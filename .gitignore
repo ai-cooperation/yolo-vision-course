@@ -26,3 +26,9 @@ runs/
 
 # OS
 .DS_Store
+
+# 教學網站要發佈的媒體（例外，需追蹤）
+!docs/
+!docs/media/
+!docs/media/*.mp4
+!docs/media/*.jpg

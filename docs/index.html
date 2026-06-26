@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YOLO 物件偵測教學 — 標籤前後對照</title>
+<meta name="description" content="用公開影片 + YOLO + Colab，從零打通物件偵測：看懂標籤、動手重跑、部署到邊緣。">
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --line:#272e38; --txt:#e6edf3; --mut:#9aa7b4;
+    --accent:#1fae5a; --accent2:#2f81f7; --max:1080px;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent2);text-decoration:none} a:hover{text-decoration:underline}
+  header{position:sticky;top:0;z-index:10;background:rgba(14,17,22,.85);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line)}
+  nav{max-width:var(--max);margin:0 auto;padding:12px 20px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  nav .brand{font-weight:700;font-size:17px;margin-right:auto}
+  nav a{color:var(--mut);font-size:15px} nav a:hover{color:var(--txt);text-decoration:none}
+  section{max-width:var(--max);margin:0 auto;padding:56px 20px;border-bottom:1px solid var(--line)}
+  h1{font-size:40px;line-height:1.25;margin:0 0 14px}
+  h2{font-size:27px;margin:0 0 8px} h3{font-size:18px;margin:0 0 6px}
+  .lead{color:var(--mut);font-size:18px;max-width:680px}
+  .hero{text-align:center;padding-top:72px}
+  .tag{display:inline-block;font-size:13px;color:var(--accent);border:1px solid var(--accent);
+    border-radius:999px;padding:3px 12px;margin-bottom:18px}
+  .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+  .btn{display:inline-block;padding:11px 22px;border-radius:8px;font-weight:600;font-size:15px}
+  .btn.p{background:var(--accent);color:#04130a} .btn.p:hover{text-decoration:none;filter:brightness(1.08)}
+  .btn.s{background:var(--panel);color:var(--txt);border:1px solid var(--line)} .btn.s:hover{text-decoration:none;border-color:var(--mut)}
+  .grid{display:grid;gap:16px} .g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h3{color:var(--txt)} .card p{color:var(--mut);margin:6px 0 0;font-size:15px}
+  .legend{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
+  .legend .k{font-weight:700;color:var(--accent)}
+  figure{margin:0} figure img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}
+  figcaption{color:var(--mut);font-size:14px;margin-top:8px;text-align:center}
+  /* carousel */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);
+    color:var(--mut);cursor:pointer;font-size:14px}
+  .tab.active{background:var(--accent);color:#04130a;border-color:var(--accent);font-weight:600}
+  video{width:100%;border-radius:12px;border:1px solid var(--line);background:#000;display:block}
+  .note{color:var(--mut);font-size:15px;margin-top:12px;padding:12px 14px;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left} th{background:var(--panel);color:var(--mut)}
+  .mut{color:var(--mut)} .small{font-size:14px}
+  ul.credits{list-style:none;padding:0;margin:10px 0 0;color:var(--mut);font-size:15px}
+  ul.credits li{padding:6px 0;border-bottom:1px solid var(--line)}
+  footer{max-width:var(--max);margin:0 auto;padding:30px 20px;color:var(--mut);font-size:14px;text-align:center}
+  @media(max-width:760px){.g2,.g3,.legend{grid-template-columns:1fr}h1{font-size:32px}section{padding:40px 18px}}
+</style>
+</head>
+<body>
+<header><nav>
+  <span class="brand">YOLO 物件偵測教學</span>
+  <a href="#what">概念</a><a href="#labels">看懂標籤</a><a href="#demo">示範</a>
+  <a href="#concepts">詞彙</a><a href="#hands">動手做</a><a href="#credits">來源</a>
+</nav></header>
+
+<section class="hero">
+  <span class="tag">智慧製造 AI 實戰 · 視覺模組</span>
+  <h1>用公開影片 + YOLO + Colab<br>看懂「電腦怎麼認出東西」</h1>
+  <p class="lead" style="margin:0 auto">一條標準流程：影片進去 → 物件偵測 → 追蹤 → 輸出標籤。
+  從標準標的（人、車）入門，再換成你自己的居家或工廠場景。</p>
+  <div class="btns">
+    <a class="btn p" href="#demo">看標籤前後對照</a>
+    <a class="btn s" href="#hands">在 Colab 動手跑</a>
+  </div>
+</section>
+
+<section id="what">
+  <h2>物件偵測在做什麼</h2>
+  <p class="lead">給模型一張影像，它回答兩件事：<b>有什麼</b>（類別）、<b>在哪裡</b>（位置框）。
+  YOLO（You Only Look Once）一次掃過整張圖就同時給出所有物體的框與類別，速度快到能跑即時影片。</p>
+  <div class="grid g3" style="margin-top:22px">
+    <div class="card"><h3>1 · 標準標的</h3><p>人、車、動物等 COCO 內建類別，免訓練直接用——本頁示範就是這層。</p></div>
+    <div class="card"><h3>2 · 通用標的</h3><p>換成你家的 ipcam，偵測人/車/寵物並通知，仍用同一條流程。</p></div>
+    <div class="card"><h3>3 · 專用標的</h3><p>工廠自家產品（COCO 沒有）→ 自己標註訓練 → 產線計數。</p></div>
+  </div>
+</section>
+
+<section id="labels">
+  <h2>怎麼讀 YOLO 標好的標籤</h2>
+  <p class="lead">每一個被偵測到的物體，會疊上一個框與一行文字。看懂這四件事就懂標籤了：</p>
+  <div class="grid g2" style="margin-top:20px;align-items:start">
+    <figure>
+      <img src="media/pedestrians.jpg" alt="YOLO 標籤前後對照（行人）">
+      <figcaption>左：原始影像　右：YOLO 標好的同一幀</figcaption>
+    </figure>
+    <div class="legend">
+      <div class="card"><div class="k">框 Bounding Box</div><p>物體的位置與大小（矩形框住它）。</p></div>
+      <div class="card"><div class="k">類別 Class</div><p>這是什麼，如 person、car、bus。</p></div>
+      <div class="card"><div class="k">信心度 Confidence</div><p>0~1 的數字，越接近 1 模型越確定，如 0.80。</p></div>
+      <div class="card"><div class="k">追蹤 ID</div><p>如 id:3，跨影格認出「同一個」物體（ByteTrack），用來去重與計數。</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="demo">
+  <h2>標籤前 vs 標籤後（多場景）</h2>
+  <p class="lead">同一條流程跑在不同場景。左邊原始、右邊 YOLO 標註，注意框、類別、信心度與追蹤 ID。</p>
+  <div class="tabs" id="tabs"></div>
+  <video id="player" controls autoplay loop muted playsinline></video>
+  <div class="note" id="note"></div>
+</section>
+
+<section id="concepts">
+  <h2>核心概念詞彙</h2>
+  <div class="grid g3" style="margin-top:18px">
+    <div class="card"><h3>Bounding Box</h3><p>框住物體的矩形，由左上、右下座標定義。</p></div>
+    <div class="card"><h3>Class &amp; Confidence</h3><p>類別 + 信心度；設門檻（如 0.35）過濾低信心的偵測。</p></div>
+    <div class="card"><h3>NMS 非極大值抑制</h3><p>同一物體常被框很多次，NMS 只留最好的一個框。</p></div>
+    <div class="card"><h3>追蹤 ByteTrack</h3><p>把每幀的框串成軌跡並給穩定 ID，避免同一物體重複計數。</p></div>
+    <div class="card"><h3>穿線計數</h3><p>物體的軌跡越過一條計數線就 +1，產線計數就靠這個。</p></div>
+    <div class="card"><h3>深入</h3><p>權威說明見 <a href="https://docs.ultralytics.com/" target="_blank" rel="noopener">Ultralytics 官方文件</a>。</p></div>
+  </div>
+</section>
+
+<section id="hands">
+  <h2>動手做：在 Colab 上自己跑一次</h2>
+  <p class="lead">免安裝、用免費 T4 GPU。換一支你自己的公開影片網址，看模型怎麼標。</p>
+  <div class="btns" style="justify-content:flex-start;margin-top:18px">
+    <a class="btn p" target="_blank" rel="noopener"
+      href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/tier1_teaching_youtube_yolo.ipynb">開啟教學 Notebook（Colab）</a>
+    <a class="btn s" target="_blank" rel="noopener"
+      href="https://github.com/ai-cooperation/yolo-vision-course">原始碼 GitHub</a>
+  </div>
+  <h3 style="margin-top:30px">一條流程，三個應用階梯</h3>
+  <table>
+    <tr><th>階梯</th><th>標的物</th><th>影像來源</th><th>要訓練嗎</th></tr>
+    <tr><td>教學</td><td>標準（人/車/動物）</td><td>YouTube 公開影片</td><td>否</td></tr>
+    <tr><td>居家</td><td>通用（人/車/寵物）</td><td>ipcam RTSP</td><td>否</td></tr>
+    <tr><td>工業</td><td>專用（自家產品）</td><td>工廠 RTSP</td><td>是（合成+微調）</td></tr>
+  </table>
+</section>
+
+<section id="credits">
+  <h2>來源與授權</h2>
+  <p class="mut small">示範影片皆為可公開重製之素材，標註結果由本課程 Colab 流程產生。</p>
+  <ul class="credits">
+    <li><b>行人穿越</b>　OpenCV 範例 vtest.avi（Apache-2.0）</li>
+    <li><b>繁忙街景</b>　Wikimedia Commons「Video of the Activities in Oshodi, Lagos, Nigeria」by Ready Street，CC BY-SA 4.0</li>
+    <li><b>1888 歷史影片</b>　Wikimedia Commons「Traffic Crossing Leeds Bridge」（Louis Le Prince, 1888），公有領域</li>
+    <li><b>偵測模型</b>　Ultralytics YOLO11（AGPL-3.0）；<b>追蹤</b>　ByteTrack</li>
+  </ul>
+  <p class="mut small" style="margin-top:14px">本站程式碼開源於 GitHub。教材內容供教學使用。</p>
+</section>
+
+<footer>
+  智慧製造 AI 實戰課程 · YOLO 視覺模組　|　影片進 → 偵測 → 追蹤 → 標籤輸出
+</footer>
+
+<script>
+  const SCENES=[
+    {name:'pedestrians',title:'行人穿越',note:'藍框 person + 穩定 ID（跨幀不變）；右上的廂型車被標成 car。'},
+    {name:'street_lagos',title:'繁忙街景',note:'同一畫面多種類別：人、車、機車、巴士；密集場景最考驗追蹤穩定度。'},
+    {name:'leeds_1888',title:'1888 歷史影片',note:'19 世紀黑白影片，模型仍抓得到部分人與馬車——也看得到誤判，正好討論模型限制。'},
+  ];
+  const tabs=document.getElementById('tabs'), player=document.getElementById('player'), note=document.getElementById('note');
+  function show(i){
+    [...tabs.children].forEach((t,j)=>t.classList.toggle('active',j===i));
+    player.src='media/'+SCENES[i].name+'.mp4';
+    player.poster='media/'+SCENES[i].name+'.jpg';
+    player.play().catch(()=>{});
+    note.textContent='觀察重點：'+SCENES[i].note;
+  }
+  SCENES.forEach((s,i)=>{const b=document.createElement('div');b.className='tab';b.textContent=s.title;b.onclick=()=>show(i);tabs.appendChild(b);});
+  show(0);
+</script>
+</body>
+</html>
