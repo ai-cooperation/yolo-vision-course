@@ -125,7 +125,10 @@ YOLO(<span class="o">"runs/detect/train/weights/best.pt"</span>).track(<span cla
       <a class="btn p" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/04_train_metal.ipynb">開啟訓練 Notebook（Colab T4）</a>
       <a class="btn s" target="_blank" rel="noopener" href="https://doi.org/10.5281/zenodo.20271102">SteelDS 資料集</a>
     </div>
-    <p class="mut small">訓練完成後，把在 SteelDS 影片上的偵測結果影片放上來，即為此級的實際成果畫面。</p>
+    <figure>
+      <img src="media/metal_result.jpg" alt="自訓練金屬零件模型的偵測結果">
+      <figcaption>實際成果：在 Colab T4 上自訓練的模型，成功偵測 Bolt / Nut / Screw / Washer 四類金屬零件（框 + 信心度）。匯出 NCNN 後即可回到第二級放上 RPi 做產線即時計數。</figcaption>
+    </figure>
   </section>
 
   <div class="pager">
