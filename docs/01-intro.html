@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>科普入門 — YOLO 物件偵測完整課程</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<aside class="sb">
+  <div class="title">YOLO 物件偵測<br>完整課程</div>
+  <div class="sub">智慧製造 AI 實戰 · 視覺模組</div>
+  <nav>
+    <a href="index.html"><span class="n">·</span> 課程總覽</a>
+    <a href="01-intro.html" class="active"><span class="n">1</span> 科普入門</a>
+    <a href="02-theory.html"><span class="n">2</span> 核心理論</a>
+    <a href="03-architecture.html"><span class="n">3</span> 架構與演進</a>
+    <a href="04-demos.html"><span class="n">4</span> 場景示範</a>
+    <a href="05-handson.html"><span class="n">5</span> 實務操作</a>
+    <a href="06-credits.html"><span class="n">6</span> 來源授權</a>
+  </nav>
+</aside>
+<main>
+  <div class="crumb">第 1 章</div>
+  <h1>科普入門：電腦怎麼「看」</h1>
+  <p class="lead">在學 YOLO 之前，先建立直覺：對電腦來說，一張影像不是「畫面」，而是一堆數字。
+  AI 的工作，是把這堆數字變成「有什麼、在哪裡」的答案。</p>
+
+  <h2>影像對電腦只是數字</h2>
+  <p>一張彩色照片，是由很多<b>像素</b>組成的格子，每個像素用三個 0~255 的數字記錄紅、綠、藍。
+  一張 1920×1080 的照片就有約 200 萬個像素、600 萬個數字。電腦看不到「人」或「車」——
+  它只看到數字。所以「認出物體」本質上是：<b>從數字裡找出有意義的模式</b>。</p>
+
+  <h2>人看圖 vs 電腦看圖</h2>
+  <div class="grid g2">
+    <div class="card"><h3>人</h3><p>一眼就知道「街上有幾個人、一台公車」，靠的是一輩子累積的經驗。</p></div>
+    <div class="card"><h3>電腦</h3><p>要先用大量「已標好答案」的影像訓練，學會把像素模式對應到類別與位置。</p></div>
+  </div>
+  <p class="mut small">這就是為什麼<b>資料</b>這麼重要：模型只會它看過的東西。沒看過的場景，往往要自己標、自己訓練（第 2、5 章會做）。</p>
+
+  <h2>物件偵測能做什麼</h2>
+  <p>把「有什麼、在哪裡、有幾個」自動算出來，就能撐起很多應用：</p>
+  <div class="grid g3">
+    <div class="card"><h3>製造</h3><p>產線計數、缺件偵測、料件分類、人員安全區監控。</p></div>
+    <div class="card"><h3>交通</h3><p>車流統計、車種辨識、違規偵測、行人安全。</p></div>
+    <div class="card"><h3>生活/零售</h3><p>來客計數、排隊偵測、居家有人/車/寵物的通知。</p></div>
+  </div>
+
+  <h2>為什麼是 YOLO</h2>
+  <p>YOLO（<b>You Only Look Once</b>）最大的特點是<b>快</b>：一次掃描整張圖就同時給出所有物體的框與類別，
+  快到能即時處理影片。這讓它特別適合現場、邊緣裝置（像 Raspberry Pi）上的即時應用。
+  原理與演進在<a href="03-architecture.html">第 3 章</a>細談。</p>
+
+  <div class="note">重點：影像 = 數字；偵測 = 從數字找模式；模型只懂它看過的東西；YOLO 的賣點是「快到能即時」。</div>
+
+  <div class="pager">
+    <a href="index.html">← 課程總覽</a>
+    <a href="02-theory.html">下一章：核心理論 →</a>
+  </div>
+</main>
+</body>
+</html>

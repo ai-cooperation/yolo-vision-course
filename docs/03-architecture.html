@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>架構與演進 — YOLO 物件偵測完整課程</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<aside class="sb">
+  <div class="title">YOLO 物件偵測<br>完整課程</div>
+  <div class="sub">智慧製造 AI 實戰 · 視覺模組</div>
+  <nav>
+    <a href="index.html"><span class="n">·</span> 課程總覽</a>
+    <a href="01-intro.html"><span class="n">1</span> 科普入門</a>
+    <a href="02-theory.html"><span class="n">2</span> 核心理論</a>
+    <a href="03-architecture.html" class="active"><span class="n">3</span> 架構與演進</a>
+    <a href="04-demos.html"><span class="n">4</span> 場景示範</a>
+    <a href="05-handson.html"><span class="n">5</span> 實務操作</a>
+    <a href="06-credits.html"><span class="n">6</span> 來源授權</a>
+  </nav>
+</aside>
+<main>
+  <div class="crumb">第 3 章</div>
+  <h1>架構與演進</h1>
+  <p class="lead">YOLO 為什麼快？它和上一代偵測方法差在哪？這一代代又改了什麼？
+  看懂這些，就知道為什麼今天能在一台 Raspberry Pi 上即時偵測。</p>
+
+  <h2>一句話原理：You Only Look Once</h2>
+  <p>名字就是重點——<b>只看一次</b>。把整張圖一次送進網路，<b>一次前向運算</b>就同時輸出所有物體的框與類別。
+  不需要反覆掃描、不需要先找候選區再逐一判斷，所以快到能跑即時影片。</p>
+
+  <h2>和傳統方法的差別：兩階段 vs 單階段</h2>
+  <div class="grid g2">
+    <div class="card"><h3>兩階段（如 R-CNN 家族）</h3><p>先產生很多「可能有物體」的候選框，再一個個分類。準，但慢——不適合即時。</p></div>
+    <div class="card"><h3>單階段（YOLO）</h3><p>把「找位置」和「分類」合成一次完成。速度大幅領先，準確度也已追上，成為即時偵測主流。</p></div>
+  </div>
+
+  <h2>演進時間軸</h2>
+  <div class="timeline">
+    <div class="ev"><span class="yr">2016 · v1</span>　首個單階段即時偵測器（Joseph Redmon）。把偵測變成一次回歸問題。</div>
+    <div class="ev"><span class="yr">2017–2018 · v2 / v3</span>　引入 anchor、多尺度預測，小物體與精度大幅改善。</div>
+    <div class="ev"><span class="yr">2020 · v4 / v5</span>　v4 集大成各種訓練技巧；v5（Ultralytics）改用 PyTorch、極易上手，讓 YOLO 真正普及。</div>
+    <div class="ev"><span class="yr">2022 · v6 / v7</span>　工業導向與架構優化，速度/精度再往前。</div>
+    <div class="ev"><span class="yr">2023 · v8</span>　Ultralytics 推出 anchor-free 設計，並把偵測/<b>分割</b>/<b>姿態</b>/分類統一在同一套 API。</div>
+    <div class="ev"><span class="yr">2024 · v9 / v10 / v11</span>　效率與精度持續推進（v10 走向免 NMS）；<b>v11 為本課程預設</b>，輕量又準。</div>
+    <div class="ev"><span class="yr">持續</span>　YOLO 仍在快速演進；學會這套流程，換新版本只是改一個模型名稱。</div>
+  </div>
+  <p class="mut small">本課程用 Ultralytics 的 YOLO11，因為它一套 API 同時支援偵測/分割/姿態，且有現成的追蹤與邊緣匯出。</p>
+
+  <h2>模型大小：速度 vs 準確度的取捨</h2>
+  <p>同一版 YOLO 會出好幾種尺寸，用後綴標示。越大越準、但越慢、越吃資源：</p>
+  <table>
+    <tr><th>後綴</th><th>大小</th><th>特性</th><th>適合</th></tr>
+    <tr><td>n (nano)</td><td>最小</td><td>最快、最省</td><td>Raspberry Pi、即時邊緣（本課主用）</td></tr>
+    <tr><td>s (small)</td><td>小</td><td>快、夠準</td><td>一般邊緣/筆電</td></tr>
+    <tr><td>m (medium)</td><td>中</td><td>平衡</td><td>有 GPU 的伺服器</td></tr>
+    <tr><td>l / x (large/xlarge)</td><td>大/最大</td><td>最準、最慢</td><td>離線分析、追求精度</td></tr>
+  </table>
+  <div class="note">實務原則：先用 <b>n</b> 跑通流程，準確度不夠再往上換尺寸或自己訓練——不要一開始就用最大模型。</div>
+
+  <div class="pager">
+    <a href="02-theory.html">← 核心理論</a>
+    <a href="04-demos.html">下一章：場景示範 →</a>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>實務操作 — YOLO 物件偵測完整課程</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<aside class="sb">
+  <div class="title">YOLO 物件偵測<br>完整課程</div>
+  <div class="sub">智慧製造 AI 實戰 · 視覺模組</div>
+  <nav>
+    <a href="index.html"><span class="n">·</span> 課程總覽</a>
+    <a href="01-intro.html"><span class="n">1</span> 科普入門</a>
+    <a href="02-theory.html"><span class="n">2</span> 核心理論</a>
+    <a href="03-architecture.html"><span class="n">3</span> 架構與演進</a>
+    <a href="04-demos.html"><span class="n">4</span> 場景示範</a>
+    <a href="05-handson.html" class="active"><span class="n">5</span> 實務操作</a>
+    <a href="06-credits.html"><span class="n">6</span> 來源授權</a>
+  </nav>
+</aside>
+<main>
+  <div class="crumb">第 5 章</div>
+  <h1>實務操作：在 Colab 上跑通</h1>
+  <p class="lead">免安裝、用免費 T4 GPU、檔案放 Google Drive，不佔本機。從標準標的入門，
+  一路做到自己的模型與邊緣部署。</p>
+
+  <h2>三個級別：從標準到專用</h2>
+  <div class="grid g3">
+    <div class="card"><h3>標準級</h3><p><b>標的：</b>人/車/動物（COCO 內建）。<br><b>來源：</b>YouTube／公開影片。<br><b>訓練：</b>免，直接用。</p></div>
+    <div class="card"><h3>通用級</h3><p><b>標的：</b>居家的人/車/寵物。<br><b>來源：</b>自家 ipcam（RTSP）。<br><b>訓練：</b>免，仍用 COCO。</p></div>
+    <div class="card"><h3>工業級</h3><p><b>標的：</b>自家產品（COCO 沒有）。<br><b>來源：</b>工廠 RTSP。<br><b>訓練：</b>要——自己標註＋合成資料微調，再做產線計數。</p></div>
+  </div>
+
+  <h2>循序操作步驟</h2>
+  <ol class="steps">
+    <li><b>開 Colab、選 T4 GPU</b>：開啟下方 Notebook，執行階段 → 變更執行階段類型 → T4 GPU。</li>
+    <li><b>設一支公開影片網址</b>：把參數格的 YouTube 連結換成你要測的（街景、人車最容易看出效果）。</li>
+    <li><b>Run All（標準級）</b>：自動下載 → 偵測 → 追蹤 → 印出辨識報告與標註影片。對照<a href="02-theory.html">第 2 章</a>看懂四個標籤部分。</li>
+    <li><b>換成你自己的標的</b>：要偵測 COCO 沒有的東西（某零件、某產品），用 Roboflow 標 50–100 張。</li>
+    <li><b>在 Colab T4 訓練（工業級）</b>：用標好的資料微調，得到自己的 <code>best.pt</code>。</li>
+    <li><b>用新影片驗證</b>：在沒看過的影片上跑，確認泛化、不是死記。</li>
+    <li><b>部署到邊緣</b>：匯出 NCNN，放到 Raspberry Pi 5 現場推論／計數。</li>
+  </ol>
+
+  <h2>Colab 實作清單</h2>
+  <p>點「在 Colab 開啟」即可執行（需登入 Google）：</p>
+  <div class="grid g2">
+    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/tier1_teaching_youtube_yolo.ipynb"><h3>入門 · YouTube + YOLO</h3><p>抓公開影片 → 偵測 → 追蹤 → 辨識報告。最快看到成果。</p></a>
+    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/00_setup.ipynb"><h3>M0 · 環境與串流</h3><p>環境設定、GPU 確認、即時串流擷取、基礎影像處理。</p></a>
+    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/01_detection.ipynb"><h3>M1 · YOLO 偵測</h3><p>什麼是 YOLO、第一次偵測、六大場景實戰、模型大小比較。</p></a>
+    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/02_applications.ipynb"><h3>M2 · 實際應用</h3><p>人數計算、區域計數、OCR 文字辨識、車流監控、YOLO+OCR 組合。</p></a>
+    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/03_challenge.ipynb"><h3>M3 · 挑戰賽</h3><p>五個分級挑戰題，從最多物件到自由創作。</p></a>
+    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/make_demos_colab.ipynb"><h3>進階 · 產生對照示範</h3><p>對 CC0 影片標籤，輸出 before/after（本站第 4 章的示範就是這樣來的）。</p></a>
+  </div>
+
+  <h2>訓練自己的模型（工業級）</h2>
+  <p>當標的是 COCO 沒有的東西，流程是：<b>標註 → 合成補強 → Colab T4 微調 → 新影片驗證 → 匯出邊緣格式</b>。
+  小樣本時用 Copy-Paste 合成（真實產品圖貼到真實背景）能大幅省下標註量。驗收看 mAP 與在「沒看過的影片」上的表現。</p>
+
+  <h2>部署到邊緣</h2>
+  <p>訓練在雲端（GPU），推論在現場（省錢、低延遲、斷網可用）。把模型 <code>export(format='ncnn')</code> 後放到
+  Raspberry Pi 5，接上 RTSP 相機，設好 ROI 與計數線，就能現場即時計數並回傳數量。</p>
+
+  <div class="pager">
+    <a href="04-demos.html">← 場景示範</a>
+    <a href="06-credits.html">下一章：來源授權 →</a>
+  </div>
+</main>
+</body>
+</html>

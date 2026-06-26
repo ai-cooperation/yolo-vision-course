@@ -32,3 +32,4 @@ runs/
 !docs/media/
 !docs/media/*.mp4
 !docs/media/*.jpg
+!docs/media/*.png

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>場景示範 — YOLO 物件偵測完整課程</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<aside class="sb">
+  <div class="title">YOLO 物件偵測<br>完整課程</div>
+  <div class="sub">智慧製造 AI 實戰 · 視覺模組</div>
+  <nav>
+    <a href="index.html"><span class="n">·</span> 課程總覽</a>
+    <a href="01-intro.html"><span class="n">1</span> 科普入門</a>
+    <a href="02-theory.html"><span class="n">2</span> 核心理論</a>
+    <a href="03-architecture.html"><span class="n">3</span> 架構與演進</a>
+    <a href="04-demos.html" class="active"><span class="n">4</span> 場景示範</a>
+    <a href="05-handson.html"><span class="n">5</span> 實務操作</a>
+    <a href="06-credits.html"><span class="n">6</span> 來源授權</a>
+  </nav>
+</aside>
+<main>
+  <div class="crumb">第 4 章</div>
+  <h1>場景示範：標籤前 vs 標籤後</h1>
+  <p class="lead">挑幾個代表性現象，看同一條流程怎麼應對。左邊原始、右邊 YOLO 標註，
+  注意框、類別、信心度與追蹤 ID 的變化。所有標註皆由本課程的 Colab 流程實際跑出。</p>
+
+  <h2>偵測：三個經典現象</h2>
+  <div class="tabs" id="tabs"></div>
+  <video id="player" controls autoplay loop muted playsinline></video>
+  <div class="note" id="note"></div>
+
+  <h2>分割：從「框」到「物體邊緣」</h2>
+  <p>偵測給的是方框；<b>分割</b>更進一步，畫出物體的<b>精確輪廓（遮罩）</b>，到像素級。
+  同一條流程換成 <code>-seg</code> 模型就能做——適合量面積、去背、看瑕疵形狀。</p>
+  <video id="segplayer" controls autoplay loop muted playsinline poster="media/seg_street.jpg">
+    <source src="media/seg_street.mp4" type="video/mp4">
+  </video>
+  <div class="note">左原始、右分割遮罩。注意它不只框住物體，而是沿著輪廓著色——這是偵測與分割最直觀的差別。</div>
+
+  <div class="pager">
+    <a href="03-architecture.html">← 架構與演進</a>
+    <a href="05-handson.html">下一章：實務操作 →</a>
+  </div>
+</main>
+<script>
+  const SCENES=[
+    {name:'street_lagos',title:'多類別同框',note:'一個畫面同時有人、汽車、機車、巴士——每個物體各自有框、類別與信心度。這是物件偵測最常見的形態：一次認出多種東西。'},
+    {name:'pedestrians',title:'移動與遮擋下的追蹤',note:'人邊走邊互相交疊、被燈柱擋住。注意 ByteTrack 的 id 能不能跨影格維持同一號——遮擋正是追蹤最難的考驗，計數準不準就看這裡。'},
+    {name:'leeds_1888',title:'模型的限制',note:'1888 年的黑白影片。模型仍抓到部分人與馬車，但也會誤判、漏抓——因為它沒看過這種畫面。這說明：換到你自己的場景，往往得自己標註、訓練。'},
+  ];
+  const tabs=document.getElementById('tabs'),player=document.getElementById('player'),note=document.getElementById('note');
+  function show(i){
+    [...tabs.children].forEach((t,j)=>t.classList.toggle('active',j===i));
+    player.src='media/'+SCENES[i].name+'.mp4'; player.poster='media/'+SCENES[i].name+'.jpg';
+    player.play().catch(()=>{}); note.textContent='觀察重點：'+SCENES[i].note;
+  }
+  SCENES.forEach((s,i)=>{const b=document.createElement('div');b.className='tab';b.textContent=s.title;b.onclick=()=>show(i);tabs.appendChild(b);});
+  show(0);
+</script>
+</body>
+</html>

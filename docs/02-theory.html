@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>核心理論 — YOLO 物件偵測完整課程</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<aside class="sb">
+  <div class="title">YOLO 物件偵測<br>完整課程</div>
+  <div class="sub">智慧製造 AI 實戰 · 視覺模組</div>
+  <nav>
+    <a href="index.html"><span class="n">·</span> 課程總覽</a>
+    <a href="01-intro.html"><span class="n">1</span> 科普入門</a>
+    <a href="02-theory.html" class="active"><span class="n">2</span> 核心理論</a>
+    <a href="03-architecture.html"><span class="n">3</span> 架構與演進</a>
+    <a href="04-demos.html"><span class="n">4</span> 場景示範</a>
+    <a href="05-handson.html"><span class="n">5</span> 實務操作</a>
+    <a href="06-credits.html"><span class="n">6</span> 來源授權</a>
+  </nav>
+</aside>
+<main>
+  <div class="crumb">第 2 章</div>
+  <h1>核心理論</h1>
+  <p class="lead">「辨識」不只一種。先搞懂四種視覺任務的差別，再看懂一個標籤的組成、偵測怎麼運作、
+  資料怎麼標，以及怎麼把每幀的框串成軌跡來計數。</p>
+
+  <h2>四種視覺任務：分類 / 偵測 / 分割 / 姿態</h2>
+  <p>同一張圖，可以問四種不同的問題，輸出也完全不同。這是最常被搞混的地方——
+  尤其<b>「框」（偵測）</b>和<b>「物體邊緣」（分割）</b>是兩件事：</p>
+  <figure>
+    <img src="media/task_compare.png" alt="分類 / 偵測 / 分割 / 姿態 四種任務對照">
+    <figcaption>同一張圖、四種任務：分類給整張一個標籤、偵測給每個物體一個框、分割畫到像素級的輪廓、姿態找關鍵點骨架</figcaption>
+  </figure>
+  <table>
+    <tr><th>任務</th><th>它回答</th><th>輸出</th><th>典型用途</th></tr>
+    <tr><td>分類 Classification</td><td>這張圖是什麼</td><td>一個類別標籤</td><td>良品/不良品判定</td></tr>
+    <tr><td><b>偵測 Detection</b></td><td>有什麼、在哪、幾個</td><td>每個物體一個<b>方框</b> + 類別 + 信心度</td><td>計數、車流、監控（本課主軸）</td></tr>
+    <tr><td><b>分割 Segmentation</b></td><td>物體的精確輪廓</td><td>每個物體一個<b>遮罩/邊緣</b>（像素級）</td><td>面積量測、去背、瑕疵形狀</td></tr>
+    <tr><td>姿態 Pose</td><td>身體關鍵點在哪</td><td>關鍵點 + 骨架</td><td>動作分析、人因工程</td></tr>
+  </table>
+  <p class="mut small">YOLO 同一家族就有對應的模型：偵測（n/s/m…）、分割（-seg）、姿態（-pose）、分類（-cls）。第 4 章有偵測與分割的可跑示範。</p>
+
+  <h2>一個偵測標籤的解剖</h2>
+  <p>偵測結果疊在畫面上時，每個物體會有一個框 + 一行文字。拆開來看就四個部分：</p>
+  <figure style="max-width:780px">
+    <img src="media/label_anatomy.png" alt="標籤解剖：框 / 類別 / 信心度 / 追蹤ID">
+    <figcaption>框＝在哪、類別＝是什麼、信心度＝多確定（0~1）、追蹤ID＝跨影格的同一個物體</figcaption>
+  </figure>
+
+  <h2>偵測怎麼運作（直覺版）</h2>
+  <div class="grid g2">
+    <div class="card"><h3>掃格子 Grid</h3><p>把圖切成網格，讓每個格子負責「猜這附近有沒有物體、是什麼、框多大」。YOLO 一次過就全部算完。</p></div>
+    <div class="card"><h3>信心門檻 Confidence</h3><p>每個預測都有 0~1 的信心度；低於門檻（如 0.35）就丟掉，避免一堆雜訊框。</p></div>
+    <div class="card"><h3>IoU 重疊度</h3><p>衡量兩個框重疊多少（交集 ÷ 聯集）。用來判斷「這個框算不算抓對」、也用在下面的 NMS。</p></div>
+    <div class="card"><h3>NMS 非極大值抑制</h3><p>同一物體常被框很多次；NMS 用 IoU 把重疊的框只留信心度最高的一個。</p></div>
+  </div>
+
+  <h2>前置作業：資料標註（Annotation）</h2>
+  <p>模型要先看過「已標好答案」的圖才會學。標註就是人工告訴模型「這裡有什麼」。
+  任務不同，標註方式也不同：</p>
+  <div class="grid g2">
+    <div class="card"><h3>偵測 → 方框 (bbox)</h3><p>框住每個物體並標類別。快、便宜，最常用。</p></div>
+    <div class="card"><h3>分割 → 多邊形/遮罩 (polygon/mask)</h3><p>沿著物體輪廓描點。較費工，但拿到像素級邊緣。</p></div>
+  </div>
+  <p>常用工具：<b>Roboflow</b>（雲端、最快，資料不敏感首選）、<b>CVAT</b>（可自架，資料敏感用）、<b>Label Studio</b>。
+  標註品質直接決定模型好壞——「垃圾進、垃圾出」。第 5 章會實際標一批並訓練。</p>
+  <div class="note">小樣本技巧：先用真實產品圖去背，貼到真實背景上合成大量變化（Copy-Paste 合成），能在沒幾張真圖時就把模型撐起來。</div>
+
+  <h2>追蹤與計數</h2>
+  <p>偵測是「單張」的。要在影片裡<b>數出幾個、不重複數</b>，得把每幀的框串成<b>軌跡</b>並給穩定 ID——這就是追蹤（本課用 <b>ByteTrack</b>）。
+  有了穩定 ID，就能做<b>穿線計數</b>：物體軌跡越過一條計數線才 +1，產線計數、來客計數都靠它。</p>
+
+  <div class="pager">
+    <a href="01-intro.html">← 科普入門</a>
+    <a href="03-architecture.html">下一章：架構與演進 →</a>
+  </div>
+</main>
+</body>
+</html>
