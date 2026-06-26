@@ -1,10 +1,10 @@
 """Compose a web demo from Colab-produced before.mp4 + after.mp4 (layout only).
 
-  python compose_demo.py <name> <title>
+  python compose_demo.py <src_folder> <out_name> [after_label]
 
-Reads site_assets/colab_demos/<name>/{before,after}.mp4 (pulled from Drive),
-stacks them side-by-side with a CJK header, writes docs/media/<name>.mp4 (H264)
-+ <name>.jpg poster. This does NOT run YOLO — labelling happens on Colab.
+Reads site_assets/colab_demos/<src_folder>/{before,after}.mp4 (pulled from
+Drive), stacks side-by-side with a CJK header, writes docs/media/<out_name>.mp4
+(H264) + poster. Labelling happened on Colab; this is layout only.
 """
 from __future__ import annotations
 
@@ -16,8 +16,10 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-NAME, TITLE = sys.argv[1], sys.argv[2]
-SRC = Path("site_assets/colab_demos") / NAME
+SRC_NAME = sys.argv[1]
+OUT_NAME = sys.argv[2]
+AFTER = sys.argv[3] if len(sys.argv) > 3 else "YOLO"
+SRC = Path("site_assets/colab_demos") / SRC_NAME
 OUT = Path("docs/media"); OUT.mkdir(parents=True, exist_ok=True)
 TMP = Path("site_assets/_tmp"); TMP.mkdir(parents=True, exist_ok=True)
 FONT = ImageFont.truetype("/System/Library/Fonts/PingFang.ttc", 24)
@@ -36,10 +38,10 @@ d.rectangle([0, 0, W, HEAD], fill=(70, 70, 70)); d.rectangle([W, 0, W * 2, HEAD]
 def ctext(cx, t):
     bb = d.textbbox((0, 0), t, font=FONT)
     d.text((cx - (bb[2]-bb[0]) / 2, (HEAD-(bb[3]-bb[1]))/2-bb[1]), t, font=FONT, fill=(255, 255, 255))
-ctext(W / 2, "標籤前｜原始"); ctext(W + W / 2, "標籤後｜YOLO")
+ctext(W / 2, "標籤前｜原始"); ctext(W + W / 2, f"標籤後｜{AFTER}")
 header = cv2.cvtColor(np.array(hdr), cv2.COLOR_RGB2BGR)
 
-tmp = TMP / f"{NAME}_sbs.mp4"
+tmp = TMP / f"{OUT_NAME}_sbs.mp4"
 vw = cv2.VideoWriter(str(tmp), cv2.VideoWriter_fourcc(*"mp4v"), FPS, (W * 2, H + HEAD))
 n = min(int(c1.get(7)), int(c2.get(7))); poster = None
 for i in range(n):
@@ -55,7 +57,7 @@ for i in range(n):
 vw.release(); c1.release(); c2.release()
 
 run(["ffmpeg", "-y", "-i", str(tmp), "-c:v", "libx264", "-crf", "26",
-     "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(OUT / f"{NAME}.mp4")])
+     "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(OUT / f"{OUT_NAME}.mp4")])
 if poster is not None:
-    cv2.imwrite(str(OUT / f"{NAME}.jpg"), poster, [cv2.IMWRITE_JPEG_QUALITY, 85])
-print(f"OK {NAME} -> docs/media/{NAME}.mp4 (+ poster), title={TITLE!r}")
+    cv2.imwrite(str(OUT / f"{OUT_NAME}.jpg"), poster, [cv2.IMWRITE_JPEG_QUALITY, 85])
+print(f"OK {SRC_NAME} -> docs/media/{OUT_NAME}.mp4 ({(OUT / f'{OUT_NAME}.mp4').stat().st_size//1024} KB)")

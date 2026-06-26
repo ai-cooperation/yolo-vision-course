@@ -1,43 +1,36 @@
-# YOLO 視覺感測 — 智慧製造課程進階模組（實作 + 驗證）
+# YOLO 物件偵測完整課程
 
-一套標準 pipeline，三個應用階梯。差異只在**標的物**與**訓練資料**，pipeline 本體共用。
-完整設計見 [ARCHITECTURE.md](ARCHITECTURE.md)。
+從科普、理論、架構演進，到實務操作的 YOLO 物件偵測公開教學。用公開影片 + Google Colab（免費 GPU）+ Google Drive，從零打通電腦視覺。
 
-## 三階梯
+**線上課程網站**：https://ai-cooperation.github.io/yolo-vision-course/
 
-| 階梯 | 標的物 | 來源 | 訓練 | 產出 |
-|---|---|---|---|---|
-| 1 教學 | 標準（COCO） | YouTube 公開影片 | 否 | 辨識驗證 + 訓練串接 |
-| 2 居家 | 通用（人/車/寵物） | ipcam RTSP | 否 | 事件分流 + TG |
-| 3 工業 | 專用（自家產品） | 工廠 RTSP | 是（合成+fine-tune） | 穿線計數 → MES |
+## 課程章節（`docs/`）
 
-## 從哪開始（雲端優先，先做教學階梯）
+1. 科普入門 — 電腦怎麼「看」、能做什麼
+2. 核心理論 — 四種任務（分類/偵測/分割/姿態）、標籤解剖、IoU/NMS、資料標註、追蹤
+3. 架構與演進 — YOLO 原理、v1→v11 時間軸、模型大小取捨
+4. 場景示範 — 多類別/移動遮擋追蹤/分割，標籤前後對照（Colab 實際產出）
+5. 實務操作 — 標準/通用/工業三級別、循序步驟、Colab 實作與訓練、邊緣部署
+6. 來源與授權
 
-開 [notebooks/tier1_teaching_youtube_yolo.ipynb](notebooks/tier1_teaching_youtube_yolo.ipynb) 到 Colab：
-1. 執行階段選 T4 GPU
-2. 掛 Google Drive（影片/模型全放 Drive，不佔本地）
-3. 設一支 YouTube 公開影片 → 跑 Part A 辨識驗證
-4. 要偵測 COCO 沒有的標的 → 跑 Part B 訓練串接
+## 動手做（Colab Notebooks，`notebooks/`）
 
-## 本地 / Edge 跑法（同一套 core 程式）
+| Notebook | 內容 |
+|---|---|
+| `tier1_teaching_youtube_yolo.ipynb` | 入門：YouTube 影片 → 偵測 → 追蹤 → 辨識報告 |
+| `workshop/00_setup.ipynb` … `03_challenge.ipynb` | 環境/串流、偵測、應用（人數/OCR/車流）、挑戰賽 |
+| `make_demos_colab.ipynb` | 對 CC0 影片標籤產生 before/after（本站第 4 章示範來源）|
+
+## 可重用 pipeline（`core/` `rules/` `sinks/` `profiles/`）
+
+一條標準 pipeline、三個 profile（教學/居家/工業），切換階梯只換 `profiles/*.yaml`：
 
 ```bash
-uv venv --python 3.12 .venv          # 本地開發 / RPi 邊緣才需要
-uv pip install --python .venv/bin/python ultralytics pyyaml
-.venv/bin/python run.py --profile profiles/teaching_standard.yaml --source clip.mp4 --max-frames 300
-.venv/bin/python run.py --profile profiles/home_sensing.yaml     --source rtsp://...
-.venv/bin/python run.py --profile profiles/factory_counting.yaml --source clip.mp4
+python run.py --profile profiles/teaching_standard.yaml --source clip.mp4
+python run.py --profile profiles/home_sensing.yaml      --source rtsp://...
+python run.py --profile profiles/factory_counting.yaml  --source clip.mp4
 ```
 
-## 結構
+## 授權
 
-```
-core/        共用四層：ingest / gate / detect+track / pipeline + profile loader
-rules/       插槽2 可插拔：event_router(居家) / line_crossing(工業)
-sinks/       插槽3 可插拔：console / csv / telegram (mqtt/http 之後補)
-profiles/    三階梯各一份 yaml（描述三個插槽怎麼配）
-notebooks/   Colab 教學實作（先跑這個）
-run.py       本地/Colab CLI runner
-```
-
-切換階梯 = 換 `profiles/*.yaml`，core 不動。
+程式碼與教材供教學使用。示範影片素材與模型工具的授權見[來源頁](https://ai-cooperation.github.io/yolo-vision-course/06-credits.html)（含 OpenCV Apache-2.0、Wikimedia CC BY-SA / 公有領域、Ultralytics YOLO11 AGPL-3.0）。
