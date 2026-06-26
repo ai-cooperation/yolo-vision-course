@@ -1,0 +1,7 @@
+{
+  "youtube_url": "",
+  "max_sec": 20,
+  "conf": 0.35,
+  "classes": null,
+  "model": "yolo11n.pt"
+}
