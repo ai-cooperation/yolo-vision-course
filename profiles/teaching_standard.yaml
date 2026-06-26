@@ -1,0 +1,19 @@
+# 階梯 1 教學：標準標的（COCO），來源 = YouTube 下載的影片檔 / 任意影片
+# 純辨識驗證，無規則；輸出標註到 console + csv。
+# source 由 CLI --source 指定（Colab 下載後的影片路徑），或填這裡。
+name: teaching_standard
+source: null
+detector:
+  model: yolo11n.pt          # COCO 預訓練，免訓練
+  conf: 0.35
+  tracking: true             # ByteTrack 給 ID，方便驗證連續性
+  classes: null              # 全類別；要聚焦可填 [person, car, bus, truck]
+gate:
+  motion: false              # 教學影片不需移動閘門，直接全偵測
+  roi: null
+rules:
+  - type: detection_summary  # 累積各類別偵測數 + 不重複追蹤數，結尾輸出辨識報告
+sinks:
+  - type: console
+  - type: csv
+    path: outputs/teaching_detections.csv

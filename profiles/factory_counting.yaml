@@ -1,0 +1,21 @@
+# 階梯 3 工業：專用標的（自訓練），來源 = 工廠 RTSP / SteelDS 測試影片
+# 穿線計數 → MES。先用 COCO 占位跑通流程，換上自訓練 best.pt 後正式計數。
+name: factory_counting
+source: null                 # rtsp://...  或 data/steelds/test.mp4
+detector:
+  model: yolo11n.pt          # 占位；自訓練後改 models/best.pt（合成 + fine-tune）
+  conf: 0.35
+  tracking: true             # ByteTrack：計數穩定性核心，同一產品只算一次
+  classes: null              # 自訓練單類時可留 null（模型只有一類）
+gate:
+  motion: false              # 輸送帶常動，靠 ROI 而非移動閘門
+  roi: null                  # 建議設計足夠長的計數 ROI，產品停留 3-5 frame
+rules:
+  - type: line_crossing
+    axis: horizontal         # 水平計數線
+    position: 0.5            # 畫面高度 50% 處
+sinks:
+  - type: console
+  - type: csv
+    path: outputs/factory_counts.csv
+  # - type: mqtt   (P1：接 MES/ERP，之後補 sinks/mqtt.py)

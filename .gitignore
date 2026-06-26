@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Local heavy artifacts (keep off git AND off your disk -> use Google Drive)
+*.pt
+*.onnx
+*.ncnn*
+data/
+datasets/
+outputs/
+runs/
+*.mp4
+*.avi
+*.jpg
+*.jpeg
+*.png
+
+# OS
+.DS_Store

@@ -1,0 +1,23 @@
+# 階梯 2 居家：通用標的（COCO），來源 = 自家 ipcam RTSP
+# 移動閘門濾雜訊；人車告警(TG)，動物只 log。
+name: home_sensing
+source: null                 # rtsp://user:pass@cam-ip:554/stream  (或 Micam 橋接後的 URL)
+detector:
+  model: yolo11n.pt          # COCO 起步，免訓練
+  conf: 0.35
+  tracking: true             # ByteTrack 去重，一個人經過只告警一次
+  classes: [person, car, bird, cat, dog]
+gate:
+  motion: true               # MOG2 移動閘門：沒動不喚醒 YOLO，擋樹葉飄動
+  min_area: 500
+  roi: null                  # 可填 [0.1,0.1,0.9,0.9] 只看畫面中央
+rules:
+  - type: event_router
+    alert_classes: [person, car]
+    log_classes: [bird, cat, dog]
+sinks:
+  - type: console
+  - type: csv
+    path: outputs/home_events.csv
+  - type: telegram           # 未設 TG_BOT_TOKEN/TG_CHAT_ID 時自動 dry-run
+    kinds: [alert]
