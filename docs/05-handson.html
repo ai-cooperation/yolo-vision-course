@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>實務操作 — YOLO 物件偵測完整課程</title>
 <link rel="stylesheet" href="assets/style.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <aside class="sb">
@@ -22,51 +23,134 @@
 </aside>
 <main>
   <div class="crumb">第 5 章</div>
-  <h1>實務操作：在 Colab 上跑通</h1>
-  <p class="lead">免安裝、用免費 T4 GPU、檔案放 Google Drive，不佔本機。從標準標的入門，
-  一路做到自己的模型與邊緣部署。</p>
-
-  <h2>三個級別：從標準到專用</h2>
-  <div class="grid g3">
-    <div class="card"><h3>標準級</h3><p><b>標的：</b>人/車/動物（COCO 內建）。<br><b>來源：</b>YouTube／公開影片。<br><b>訓練：</b>免，直接用。</p></div>
-    <div class="card"><h3>通用級</h3><p><b>標的：</b>居家的人/車/寵物。<br><b>來源：</b>自家 ipcam（RTSP）。<br><b>訓練：</b>免，仍用 COCO。</p></div>
-    <div class="card"><h3>工業級</h3><p><b>標的：</b>自家產品（COCO 沒有）。<br><b>來源：</b>工廠 RTSP。<br><b>訓練：</b>要——自己標註＋合成資料微調，再做產線計數。</p></div>
+  <h1>實務操作：三級循序</h1>
+  <p class="lead">三個級別，難度遞增：先用標準模型一鍵看結果，再把模型放到邊緣裝置接真實串流，
+  最後訓練自己的專用模型。每一級都有操作示意（mockup）+ 實際畫面。</p>
+  <div class="flow">
+    <span class="b">第一級 標準</span><span class="a">→</span>
+    <span class="b">第二級 邊緣部署</span><span class="a">→</span>
+    <span class="b">第三級 工業訓練</span>
   </div>
 
-  <h2>循序操作步驟</h2>
-  <ol class="steps">
-    <li><b>開 Colab、選 T4 GPU</b>：開啟下方 Notebook，執行階段 → 變更執行階段類型 → T4 GPU。</li>
-    <li><b>設一支公開影片網址</b>：把參數格的 YouTube 連結換成你要測的（街景、人車最容易看出效果）。</li>
-    <li><b>Run All（標準級）</b>：自動下載 → 偵測 → 追蹤 → 印出辨識報告與標註影片。對照<a href="02-theory.html">第 2 章</a>看懂四個標籤部分。</li>
-    <li><b>換成你自己的標的</b>：要偵測 COCO 沒有的東西（某零件、某產品），用 Roboflow 標 50–100 張。</li>
-    <li><b>在 Colab T4 訓練（工業級）</b>：用標好的資料微調，得到自己的 <code>best.pt</code>。</li>
-    <li><b>用新影片驗證</b>：在沒看過的影片上跑，確認泛化、不是死記。</li>
-    <li><b>部署到邊緣</b>：匯出 NCNN，放到 Raspberry Pi 5 現場推論／計數。</li>
-  </ol>
+  <!-- ===== 第一級 ===== -->
+  <section class="level">
+    <span class="lvtag">第一級 · 標準</span>
+    <h2>Colab 一鍵：用開源影片看結果</h2>
+    <p>全程免安裝、用免費 GPU、素材都是公開影片。打開現成 Notebook、按 Run all，就看到偵測結果。</p>
+    <div class="mock colab">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        tier1_teaching_youtube_yolo.ipynb<span class="pill">▶ Run all</span></div>
+      <pre><span class="c"># 換成你的公開影片網址</span>
+YT_URL = <span class="o">"https://www.youtube.com/watch?v=..."</span>
+model = YOLO(<span class="o">"yolo11n.pt"</span>)          <span class="c"># COCO 預訓練，免訓練</span>
+model.track(clip, tracker=<span class="o">"bytetrack.yaml"</span>)  <span class="c"># 偵測 + 追蹤</span>
+<span class="c"># → 輸出：辨識報告 + 標註影片</span></pre>
+    </div>
+    <p>操作步驟：開 Notebook → 執行階段選 GPU（沒 GPU 用 CPU 也行）→ Run all → 看辨識報告與標註影片。</p>
+    <div class="grid g3">
+      <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/tier1_teaching_youtube_yolo.ipynb"><h3>入門 · YouTube+YOLO</h3><p>影片→偵測→追蹤→報告。最快看到成果。</p></a>
+      <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/01_detection.ipynb"><h3>M1 · YOLO 偵測</h3><p>六大場景實戰、模型大小比較。</p></a>
+      <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/02_applications.ipynb"><h3>M2 · 應用</h3><p>人數計算、OCR、車流監控。</p></a>
+    </div>
+    <p class="mut small">實際結果畫面見 <a href="04-demos.html">第 4 章 場景示範</a>（這些 before/after 就是這一級跑出來的）。</p>
+  </section>
 
-  <h2>Colab 實作清單</h2>
-  <p>點「在 Colab 開啟」即可執行（需登入 Google）：</p>
-  <div class="grid g2">
-    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/tier1_teaching_youtube_yolo.ipynb"><h3>入門 · YouTube + YOLO</h3><p>抓公開影片 → 偵測 → 追蹤 → 辨識報告。最快看到成果。</p></a>
-    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/00_setup.ipynb"><h3>M0 · 環境與串流</h3><p>環境設定、GPU 確認、即時串流擷取、基礎影像處理。</p></a>
-    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/01_detection.ipynb"><h3>M1 · YOLO 偵測</h3><p>什麼是 YOLO、第一次偵測、六大場景實戰、模型大小比較。</p></a>
-    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/02_applications.ipynb"><h3>M2 · 實際應用</h3><p>人數計算、區域計數、OCR 文字辨識、車流監控、YOLO+OCR 組合。</p></a>
-    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/03_challenge.ipynb"><h3>M3 · 挑戰賽</h3><p>五個分級挑戰題，從最多物件到自由創作。</p></a>
-    <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/make_demos_colab.ipynb"><h3>進階 · 產生對照示範</h3><p>對 CC0 影片標籤，輸出 before/after（本站第 4 章的示範就是這樣來的）。</p></a>
-  </div>
+  <!-- ===== 第二級 ===== -->
+  <section class="level">
+    <span class="lvtag">第二級 · 邊緣部署</span>
+    <h2>把 YOLO 放到 Raspberry Pi，接真實道路串流</h2>
+    <p>訓練在雲端、推論在現場。把模型匯出成 NCNN 放到 RPi 5，接 RTSP 即時影像，現場就能即時偵測。
+    下面是台灣公開的國道即時影像——同一條串流，RPi 上的 YOLO 就能即時數車流：</p>
+    <div class="cam">
+      <span class="live">● LIVE</span>
+      <img src="https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=10001" alt="國道1號即時影像" loading="lazy">
+      <div class="src">影像來源：交通部高速公路局／交通資料庫（政府資料開放授權條款第1版）· 國道1號 基隆端</div>
+    </div>
+    <div class="flow" style="margin-top:16px">
+      <span class="b">RTSP/串流</span><span class="a">→</span><span class="b">RPi 5</span><span class="a">→</span>
+      <span class="b">YOLO (NCNN)</span><span class="a">→</span><span class="b">即時框 + 計數</span>
+    </div>
 
-  <h2>訓練自己的模型（工業級）</h2>
-  <p>當標的是 COCO 沒有的東西，流程是：<b>標註 → 合成補強 → Colab T4 微調 → 新影片驗證 → 匯出邊緣格式</b>。
-  小樣本時用 Copy-Paste 合成（真實產品圖貼到真實背景）能大幅省下標註量。驗收看 mAP 與在「沒看過的影片」上的表現。</p>
+    <div class="gate" id="gatebox">
+      <h3>登入 Google 查看完整邊緣部署指引</h3>
+      <p>RPi 安裝、NCNN 匯出、接 RTSP、設 ROI 與計數線的逐步指令，登入後檢視。</p>
+      <div id="gbtn"></div>
+      <div class="setup" id="gate-note" style="display:none">提示：網站擁有者需在 Google Cloud 建 OAuth Client ID，並把 <code>https://cooperation.tw</code> 加入「授權的 JavaScript 來源」，再把 Client ID 填進本頁，登入 gate 即啟用。目前先直接顯示指引。</div>
+    </div>
 
-  <h2>部署到邊緣</h2>
-  <p>訓練在雲端（GPU），推論在現場（省錢、低延遲、斷網可用）。把模型 <code>export(format='ncnn')</code> 後放到
-  Raspberry Pi 5，接上 RTSP 相機，設好 ROI 與計數線，就能現場即時計數並回傳數量。</p>
+    <div id="edge-guide" style="display:none">
+      <h3>邊緣部署逐步指引</h3>
+      <ol class="steps">
+        <li><b>RPi 5 安裝</b>：燒錄 Raspberry Pi OS（64-bit），開機後安裝 Python。</li>
+        <li><b>裝套件</b>：<code>pip install ultralytics ncnn</code>。</li>
+        <li><b>雲端匯出模型</b>：在 Colab <code>YOLO("yolo11n.pt").export(format="ncnn")</code>，把產出複製到 RPi。</li>
+        <li><b>接 RTSP / 串流</b>：用 <code>cv2.VideoCapture("rtsp://...")</code>（國道 MJPEG 也可直接讀）。</li>
+        <li><b>設 ROI 與計數線</b>：只看畫面中要計數的區域，畫一條穿越線。</li>
+        <li><b>即時推論</b>：逐幀 <code>model.track(...)</code> + ByteTrack，越線就 +1。</li>
+      </ol>
+      <div class="mock term">
+        <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span> pi@raspberrypi: ~/edge</div>
+        <pre><span class="c"># 接國道即時影像，邊緣即時偵測車流</span>
+$ python edge_count.py \
+    --source <span class="o">"https://cctvn.freeway.gov.tw/abs2mjpg/bmjpg?camera=10001"</span> \
+    --model yolo11n_ncnn_model --line 0.5
+<span class="o">[14:32:01] 車輛=6  累積過線=18  FPS=7.2</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第三級 ===== -->
+  <section class="level">
+    <span class="lvtag">第三級 · 工業訓練</span>
+    <h2>訓練自己的模型：金屬零件（COCO 沒有的東西）</h2>
+    <p>當標的是 COCO 不認得的東西（產線金屬零件），就要自己訓練。案例用開源的
+    <b>SteelDS</b>（輸送帶金屬廢料資料集，YOLO 格式、含影片、CC BY 4.0）。流程：下載 → Colab T4 微調 → 在它的影片上推論看結果。</p>
+    <div class="mock colab">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        04_train_metal.ipynb<span class="pill">▶ Run all (T4)</span></div>
+      <pre><span class="c"># 1. 下載 SteelDS 子集（金屬零件，YOLO 格式）</span>
+!wget -q zenodo.org/records/20271102/files/a4.zip && unzip -q a4.zip
+<span class="c"># 2. Colab T4 微調</span>
+YOLO(<span class="o">"yolo11n.pt"</span>).train(data=<span class="o">"a4/data.yaml"</span>, epochs=50, imgsz=640)
+<span class="c"># 3. 在 SteelDS 影片上推論看結果</span>
+YOLO(<span class="o">"runs/detect/train/weights/best.pt"</span>).track(<span class="o">"steelds_clip.mp4"</span>, save=True)</pre>
+    </div>
+    <ol class="steps">
+      <li><b>取資料</b>：SteelDS 子集 a4（4.9GB，輸送帶金屬，已標好 YOLO 框）；快速版可用 Roboflow「Bolts」(螺絲/螺帽)。</li>
+      <li><b>Colab T4 訓練</b>：從 yolo11n 微調，看 mAP 收斂。</li>
+      <li><b>驗證</b>：在沒看過的影片/影像上跑，確認泛化。</li>
+      <li><b>部署</b>：匯出 NCNN → 回到第二級，放上 RPi 做產線即時計數。</li>
+    </ol>
+    <div class="btns">
+      <a class="btn p" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/04_train_metal.ipynb">開啟訓練 Notebook（Colab T4）</a>
+      <a class="btn s" target="_blank" rel="noopener" href="https://doi.org/10.5281/zenodo.20271102">SteelDS 資料集</a>
+    </div>
+    <p class="mut small">訓練完成後，把在 SteelDS 影片上的偵測結果影片放上來，即為此級的實際成果畫面。</p>
+  </section>
 
   <div class="pager">
     <a href="04-demos.html">← 場景示範</a>
     <a href="06-credits.html">下一章：來源授權 →</a>
   </div>
 </main>
+
+<script>
+  const CLIENT_ID = "YOUR_CLIENT_ID.apps.googleusercontent.com"; // 設定後啟用登入 gate
+  const gb = document.getElementById('gatebox'), eg = document.getElementById('edge-guide');
+  function reveal(){ eg.style.display='block'; gb.style.display='none'; }
+  if (!CLIENT_ID || CLIENT_ID.indexOf('YOUR_CLIENT_ID') === 0) {
+    document.getElementById('gate-note').style.display = 'block';   // gate 未設定 → 先顯示指引
+    reveal();
+  } else if (sessionStorage.getItem('edge_unlocked') === '1') {
+    reveal();
+  } else {
+    window.addEventListener('load', function(){
+      google.accounts.id.initialize({ client_id: CLIENT_ID, callback: function(resp){
+        if (resp && resp.credential) { sessionStorage.setItem('edge_unlocked','1'); reveal(); }
+      }});
+      google.accounts.id.renderButton(document.getElementById('gbtn'), {theme:'outline', size:'large', text:'signin_with'});
+    });
+  }
+</script>
 </body>
 </html>

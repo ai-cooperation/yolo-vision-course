@@ -70,6 +70,33 @@ ol.steps li b{color:var(--txt)}
 ul.credits{list-style:none;padding:0;margin:10px 0 0;color:var(--mut);font-size:15px}
 ul.credits li{padding:8px 0;border-bottom:1px solid var(--line)}
 
+/* level blocks */
+.level{border:1px solid var(--line);border-radius:14px;padding:4px 20px 20px;margin:20px 0;background:#12161c}
+.level .lvtag{display:inline-block;margin:18px 0 0;font-size:13px;font-weight:700;color:#04130a;background:var(--accent);border-radius:999px;padding:3px 12px}
+.level h2{margin-top:8px;border:0}
+
+/* mockups */
+.mock{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0;background:#0b0e13}
+.mock .bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#161b22;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut)}
+.mock .bar .dot{width:11px;height:11px;border-radius:50%} .dot.r{background:#ff5f56}.dot.y{background:#ffbd2e}.dot.g{background:#27c93f}
+.mock .bar .pill{margin-left:auto;background:var(--accent);color:#04130a;border-radius:999px;padding:2px 10px;font-weight:700;font-size:12px}
+.mock pre{margin:0;padding:14px 16px;font-family:"SF Mono",Consolas,monospace;font-size:13.5px;color:#d7e0ea;white-space:pre-wrap;line-height:1.6}
+.mock pre .c{color:#7d8aa0} .mock pre .k{color:#79c0ff} .mock pre .o{color:#56d364}
+
+/* live camera */
+.cam{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#000}
+.cam img{width:100%;display:block}
+.cam .live{position:absolute;top:10px;left:10px;background:#e5484d;color:#fff;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;letter-spacing:.5px}
+.cam .src{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#cdd6e0;font-size:12px;padding:5px 10px}
+
+/* login gate */
+.gate{border:1px dashed var(--accent);border-radius:12px;padding:22px;text-align:center;background:#10160f;margin:14px 0}
+.gate h3{color:var(--txt);margin:0 0 6px} .gate p{color:var(--mut);font-size:14px;margin:6px 0 14px}
+.gate .setup{margin-top:14px;font-size:12.5px;color:#7d8aa0}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0;color:var(--mut);font-size:14px}
+.flow .b{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.flow .a{color:var(--accent)}
+
 @media(max-width:860px){
   .sb{position:static;width:auto;height:auto;border-right:none;border-bottom:1px solid var(--line)}
   .sb nav{flex-direction:row;flex-wrap:wrap}
