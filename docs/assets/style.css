@@ -42,6 +42,7 @@ b,strong{color:var(--txt)}
 .card h3{margin:0 0 6px;color:var(--txt)} .card p{color:var(--mut);margin:6px 0 0;font-size:15px}
 .card.link{transition:border-color .15s} a.card.link:hover{border-color:var(--accent);text-decoration:none}
 .card .num{color:var(--accent);font-weight:800;font-size:14px}
+.card img{width:100%;border-radius:8px;margin-bottom:10px;border:1px solid var(--line);display:block}
 
 figure{margin:22px 0} figure img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}
 figcaption{color:var(--mut);font-size:14px;margin-top:8px;text-align:center}

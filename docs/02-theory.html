@@ -50,6 +50,10 @@
   </figure>
 
   <h2>偵測怎麼運作（直覺版）</h2>
+  <figure>
+    <img src="media/detect_run.png" alt="掃格子 Grid / IoU 重疊度 / NMS 去重">
+    <figcaption>掃格子找物體 → 用 IoU 衡量框的重疊 → 用 NMS 把同一物體的重複框只留一個</figcaption>
+  </figure>
   <div class="grid g2">
     <div class="card"><h3>掃格子 Grid</h3><p>把圖切成網格，讓每個格子負責「猜這附近有沒有物體、是什麼、框多大」。YOLO 一次過就全部算完。</p></div>
     <div class="card"><h3>信心門檻 Confidence</h3><p>每個預測都有 0~1 的信心度；低於門檻（如 0.35）就丟掉，避免一堆雜訊框。</p></div>
@@ -64,6 +68,10 @@
     <div class="card"><h3>偵測 → 方框 (bbox)</h3><p>框住每個物體並標類別。快、便宜，最常用。</p></div>
     <div class="card"><h3>分割 → 多邊形/遮罩 (polygon/mask)</h3><p>沿著物體輪廓描點。較費工，但拿到像素級邊緣。</p></div>
   </div>
+  <figure>
+    <img src="media/annotation.png" alt="標註：方框 bbox vs 多邊形/遮罩">
+    <figcaption>同一個人：偵測標「方框」（左），分割標「多邊形/遮罩」描出輪廓（右）</figcaption>
+  </figure>
   <p>常用工具：<b>Roboflow</b>（雲端、最快，資料不敏感首選）、<b>CVAT</b>（可自架，資料敏感用）、<b>Label Studio</b>。
   標註品質直接決定模型好壞——「垃圾進、垃圾出」。第 5 章會實際標一批並訓練。</p>
   <div class="note">小樣本技巧：先用真實產品圖去背，貼到真實背景上合成大量變化（Copy-Paste 合成），能在沒幾張真圖時就把模型撐起來。</div>
