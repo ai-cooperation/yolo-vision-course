@@ -2,7 +2,7 @@
 
 從科普、理論、架構演進，到實務操作的 YOLO 物件偵測公開教學。用公開影片 + Google Colab（免費 GPU）+ Google Drive，從零打通電腦視覺。
 
-**線上課程網站**：https://ai-cooperation.github.io/yolo-vision-course/
+**線上課程網站**：http://cooperation.tw/yolo-vision-course/
 
 ## 課程章節（`docs/`）
 
@@ -33,4 +33,4 @@ python run.py --profile profiles/factory_counting.yaml  --source clip.mp4
 
 ## 授權
 
-程式碼與教材供教學使用。示範影片素材與模型工具的授權見[來源頁](https://ai-cooperation.github.io/yolo-vision-course/06-credits.html)（含 OpenCV Apache-2.0、Wikimedia CC BY-SA / 公有領域、Ultralytics YOLO11 AGPL-3.0）。
+程式碼與教材供教學使用。示範影片素材與模型工具的授權見[來源頁](http://cooperation.tw/yolo-vision-course/06-credits.html)（含 OpenCV Apache-2.0、Wikimedia CC BY-SA / 公有領域、Ultralytics YOLO11 AGPL-3.0）。
