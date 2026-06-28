@@ -33,3 +33,8 @@ runs/
 !docs/media/*.mp4
 !docs/media/*.jpg
 !docs/media/*.png
+
+site_assets/_tmp/
+site_assets/bolts/
+site_assets/metal_result/
+site_assets/colab_demos/
