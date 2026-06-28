@@ -43,11 +43,24 @@
   <p class="mut small">這就是為什麼<b>資料</b>這麼重要：模型只會它看過的東西。沒看過的場景，往往要自己標、自己訓練（第 2、5 章會做）。</p>
 
   <h2>物件偵測能做什麼</h2>
-  <p>把「有什麼、在哪裡、有幾個」自動算出來，就能撐起很多應用：</p>
-  <div class="grid g3">
-    <div class="card"><img src="media/app_traffic.jpg" alt="交通場景偵測"><h3>交通</h3><p>車流統計、車種辨識、違規偵測、行人安全。</p></div>
-    <div class="card"><img src="media/app_life.jpg" alt="人流場景偵測"><h3>生活 / 零售</h3><p>來客計數、排隊偵測、居家有人/車/寵物的通知。</p></div>
-    <div class="card"><img src="media/app_factory.jpg" alt="自訓練金屬零件偵測"><h3>製造</h3><p>產線計數、缺件偵測、料件分類、安全區監控。<br><span class="mut small">這是自訓練模型偵測金屬零件，做法見<a href="05-handson.html">第 5 章 · 工業級</a></span></p></div>
+  <p>把「有什麼、在哪裡、有幾個」自動算出來，就能撐起很多應用。每個案例：原圖 → YOLO 偵測 → 說明。</p>
+
+  <div class="case">
+    <figure><img src="media/app_traffic_before.jpg" alt="交通原圖"><figcaption>原圖</figcaption></figure>
+    <figure><img src="media/app_traffic_after.jpg" alt="交通偵測"><figcaption>YOLO 偵測 4 車</figcaption></figure>
+    <div class="desc"><h3>交通</h3><p>車流統計、車種辨識、違規偵測、行人安全。<br><span class="small">影像：國道1號即時影像</span></p></div>
+  </div>
+
+  <div class="case">
+    <figure><img src="media/app_life_before.jpg" alt="生活原圖"><figcaption>原圖</figcaption></figure>
+    <figure><img src="media/app_life_after.jpg" alt="生活偵測"><figcaption>YOLO 偵測 5 人</figcaption></figure>
+    <div class="desc"><h3>生活 / 零售</h3><p>來客計數、排隊偵測、居家有人 / 車 / 寵物的通知。</p></div>
+  </div>
+
+  <div class="case">
+    <figure><img src="media/app_factory_before.jpg" alt="製造原圖"><figcaption>原圖</figcaption></figure>
+    <figure><img src="media/app_factory_after.jpg" alt="製造偵測"><figcaption>偵測 30 件</figcaption></figure>
+    <div class="desc"><h3>製造</h3><p>產線計數、缺件偵測、料件分類、安全區監控。<br><span class="small">自訓練模型偵測金屬零件，做法見<a href="05-handson.html">第 5 章 · 工業級</a></span></p></div>
   </div>
 
   <h2>為什麼是 YOLO</h2>
