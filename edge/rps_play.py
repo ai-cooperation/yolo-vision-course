@@ -206,6 +206,41 @@ class HandTracker:
         return lm
 
 
+def hand_crop(clean_frame, landmarks, pad=0.3, size=180):
+    """以手部關鍵點的外接框 + 邊距，從乾淨畫面截一張手勢縮圖。"""
+    h, w = clean_frame.shape[:2]
+    xs = [p[0] for p in landmarks]
+    ys = [p[1] for p in landmarks]
+    bw, bh = max(xs) - min(xs), max(ys) - min(ys)
+    x0 = max(0, int((min(xs) - pad * bw) * w))
+    x1 = min(w, int((max(xs) + pad * bw) * w))
+    y0 = max(0, int((min(ys) - pad * bh) * h))
+    y1 = min(h, int((max(ys) + pad * bh) * h))
+    if x1 - x0 < 10 or y1 - y0 < 10:
+        return None
+    return cv2.resize(clean_frame[y0:y1, x0:x1], (size, size))
+
+
+def overlay_thumb(frame, thumb, label):
+    """把縮圖貼到畫面右上角，加白框與標籤。"""
+    h, w = frame.shape[:2]
+    th, tw = thumb.shape[:2]
+    x, y = w - tw - 14, 14
+    frame[y:y + th, x:x + tw] = thumb
+    cv2.rectangle(frame, (x - 2, y - 2), (x + tw + 2, y + th + 2), (255, 255, 255), 2)
+    put_lines(frame, [(label, (x, y + th + 6), (255, 255, 255))])
+
+
+WIN = "RPS - q to quit"
+ORDER = ("scissors", "rock", "paper")   # 練習順序：剪刀 → 石頭 → 布
+HOLD = 18                               # 手勢穩住這麼多幀就觸發（約 1 秒）
+STEP = 6                                # 倒數每格幀數（顯示 3 → 2 → 1）
+
+
+def countdown_num(stable_n):
+    return min(3, max(1, (HOLD - stable_n) // STEP + 1))
+
+
 def main():
     ap = argparse.ArgumentParser(description="MediaPipe 視訊猜拳")
     ap.add_argument("--camera", type=int, default=0, help="鏡頭編號（預設 0）")
@@ -219,37 +254,26 @@ def main():
         print("打不開鏡頭，請確認權限或換 --camera 編號")
         return
 
+    refs = {}                 # move -> 練習階段截下的手勢縮圖
+    mode = "practice"         # practice → game
+    pidx = 0                  # 練習進度
     score = {"you": 0, "cpu": 0}
-    result_banner = ""        # 上一回合結果（持久顯示）
-    last_move = None          # 最近一次看到的有效手勢
-    stable_move, stable_n = None, 0   # 連續穩定同一手勢的幀數
-    cooldown = 0              # 出拳後的冷卻（顯示結果、避免連發）
-    HOLD = 18                 # 手勢穩住這麼多幀就自動出拳（約 1 秒）
-    STEP = 6                  # 倒數每格幀數（HOLD/3，用來顯示 3 → 2 → 1）
-    hint = "穩住手勢，倒數 3-2-1 自動出拳（或按空白鍵）；q 結束" if _CJK \
-        else "Hold a gesture, 3-2-1 auto-play (or press SPACE); q to quit"
-
-    def play_round(move):
-        cpu = random.choice(MOVES)
-        result = judge(move, cpu)
-        if result == "win":
-            score["you"] += 1
-        elif result == "lose":
-            score["cpu"] += 1
-        text = (f"你{ZH[move]} vs 電腦{ZH[cpu]} → {outcome_text(result)}" if _CJK
-                else f"You {EN[move]} vs CPU {EN[cpu]} -> {outcome_text(result)}")
-        print(f"[出拳] {text}   比分 YOU {score['you']} : {score['cpu']} CPU")
-        return text
+    banner = ""               # 持久顯示的提示 / 結果
+    last_move = None
+    stable_move, stable_n = None, 0
+    cooldown = 0
+    cpu_move = None           # 本回合 CPU 出的拳
 
     while True:
         ok, frame = cap.read()
         if not ok:
             break
         frame = cv2.flip(frame, 1)
+        clean = frame.copy()              # 沒畫骨架的乾淨畫面，給截圖用
         lm = tracker.process(frame)
         move = classify(lm) if lm else None
+        H = frame.shape[0]
 
-        # 追蹤「同一手勢穩定多久」
         if move and move == stable_move:
             stable_n += 1
         else:
@@ -259,34 +283,78 @@ def main():
         if cooldown > 0:
             cooldown -= 1
 
+        # ---------- 練習階段：依序記錄 剪刀 / 石頭 / 布 ----------
+        if mode == "practice":
+            target = ORDER[pidx]
+            lines = [
+                (f"練習 {pidx + 1}/3：請比出「{name(target)}」" if _CJK
+                 else f"Practice {pidx + 1}/3: show {EN[target]}", (12, 12), (0, 255, 255)),
+                (f"目前偵測：{name(move)}" if _CJK else f"Now: {name(move)}", (12, 50), (200, 200, 200)),
+            ]
+            if banner:
+                lines.append((banner, (12, 88), (0, 255, 0)))
+            lines.append(((f"比出指定手勢穩住即可記錄；q 結束" if _CJK
+                           else "hold the asked gesture to save; q quit"), (12, H - 34), (200, 200, 200)))
+            put_lines(frame, lines)
+            if cooldown == 0 and move == target and 0 < stable_n < HOLD:
+                put_big_center(frame, str(countdown_num(stable_n)), (0, 200, 255))
+            cv2.imshow(WIN, frame)
+
+            key = cv2.waitKey(1) & 0xFF
+            if key in (ord("q"), 27):
+                break
+            if cooldown == 0 and move == target and stable_n >= HOLD:
+                crop = hand_crop(clean, lm)
+                if crop is not None:
+                    refs[target] = crop
+                    print(f"[練習] 已記錄 {ZH[target]}")
+                    banner = f"已記錄 {ZH[target]}" if _CJK else f"Saved {EN[target]}"
+                    pidx += 1
+                    stable_n, cooldown = 0, 20
+                    if pidx >= len(ORDER):
+                        mode = "game"
+                        banner = "準備好了！開始猜拳" if _CJK else "Ready! Let's play"
+                        cooldown = 30
+            continue
+
+        # ---------- 遊戲階段 ----------
         lines = [
             (f"偵測：{name(move)}" if _CJK else f"Detected: {name(move)}", (12, 12), (0, 255, 255)),
             (f"YOU {score['you']} : {score['cpu']} CPU", (12, 50), (0, 0, 255)),
         ]
-        if result_banner:
-            lines.append((result_banner, (12, 88), (0, 255, 0)))
-        lines.append((hint, (12, frame.shape[0] - 34), (200, 200, 200)))
+        if banner:
+            lines.append((banner, (12, 88), (0, 255, 0)))
+        lines.append(((f"穩住手勢倒數 3-2-1 出拳（空白鍵亦可）；q 結束" if _CJK
+                       else "hold to count 3-2-1 (or SPACE); q quit"), (12, H - 34), (200, 200, 200)))
         put_lines(frame, lines)
-        # 中央大字：穩住手勢時倒數 3 → 2 → 1，出拳瞬間顯示「出拳！」
-        if cooldown == 0 and move and 0 < stable_n < HOLD:
-            count = min(3, max(1, (HOLD - stable_n) // STEP + 1))
-            put_big_center(frame, str(count), (0, 200, 255))
-        elif cooldown >= 30:
-            put_big_center(frame, "出拳！" if _CJK else "GO!", (0, 255, 0))
-        cv2.imshow("RPS (hold gesture or SPACE, q=quit)", frame)
+
+        if cooldown > 0 and cpu_move is not None:           # 出拳後：顯示 CPU 的拳 + 結果
+            overlay_thumb(frame, refs[cpu_move], "電腦出" if _CJK else "CPU")
+            if cooldown >= 38:
+                put_big_center(frame, "出拳！" if _CJK else "GO!", (0, 255, 0))
+        elif cooldown == 0 and move and 0 < stable_n < HOLD:  # 穩住中：倒數
+            put_big_center(frame, str(countdown_num(stable_n)), (0, 200, 255))
+        cv2.imshow(WIN, frame)
 
         key = cv2.waitKey(1) & 0xFF
         if key in (ord("q"), 27):
             break
-
         played = None
-        if key == ord(" ") and (move or last_move):        # 空白鍵手動出拳
+        if key == ord(" ") and (move or last_move):
             played = move or last_move
-        elif cooldown == 0 and move and stable_n >= HOLD:   # 穩住自動出拳
+        elif cooldown == 0 and move and stable_n >= HOLD:
             played = move
         if played:
-            result_banner = play_round(played)
-            cooldown, stable_n = 40, 0
+            cpu_move = random.choice(MOVES)
+            result = judge(played, cpu_move)
+            if result == "win":
+                score["you"] += 1
+            elif result == "lose":
+                score["cpu"] += 1
+            banner = (f"你{ZH[played]} vs 電腦{ZH[cpu_move]} → {outcome_text(result)}" if _CJK
+                      else f"You {EN[played]} vs CPU {EN[cpu_move]} -> {outcome_text(result)}")
+            print(f"[出拳] {banner}   比分 YOU {score['you']} : {score['cpu']} CPU")
+            cooldown, stable_n = 45, 0
 
     cap.release()
     cv2.destroyAllWindows()
