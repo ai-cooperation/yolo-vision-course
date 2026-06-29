@@ -35,24 +35,25 @@
   <!-- ===== 第一級 ===== -->
   <section class="level">
     <span class="lvtag">第一級 · 標準</span>
-    <h2>Colab 一鍵：用開源影片看結果</h2>
-    <p>全程免安裝、用免費 GPU、素材都是公開影片。打開現成 Notebook、按 Run all，就看到偵測結果。</p>
+    <h2>Colab 一鍵：直接看 YOLO 偵測結果</h2>
+    <p>全程免安裝、用免費 GPU，素材都是課程內建的公開影片與政府國道即時影像。打開現成 Notebook、按 Run all，就看到偵測結果。</p>
     <div class="mock colab">
       <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-        tier1_teaching_youtube_yolo.ipynb<span class="pill">▶ Run all</span></div>
-      <pre><span class="c"># 換成你的公開影片網址</span>
-YT_URL = <span class="o">"https://www.youtube.com/watch?v=..."</span>
-model = YOLO(<span class="o">"yolo11n.pt"</span>)          <span class="c"># COCO 預訓練，免訓練</span>
-model.track(clip, tracker=<span class="o">"bytetrack.yaml"</span>)  <span class="c"># 偵測 + 追蹤</span>
-<span class="c"># → 輸出：辨識報告 + 標註影片</span></pre>
+        01_detection.ipynb<span class="pill">▶ Run all</span></div>
+      <pre><span class="c"># 課程內建來源：國道即時影像 + CC 授權影片（免設定）</span>
+frame = grab_frame(STREAMS[<span class="o">"動物·羊群"</span>])    <span class="c"># 換成任一場景</span>
+model = YOLO(<span class="o">"yolo11n.pt"</span>)               <span class="c"># COCO 預訓練，免訓練</span>
+results = model(frame)                        <span class="c"># 偵測</span>
+results[0].plot()                             <span class="c"># → 標好框的結果影像</span></pre>
     </div>
-    <p>操作步驟：開 Notebook → 執行階段選 GPU（沒 GPU 用 CPU 也行）→ Run all → 看辨識報告與標註影片。</p>
-    <div class="grid g3">
-      <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/tier1_teaching_youtube_yolo.ipynb"><h3>入門 · YouTube+YOLO</h3><p>影片→偵測→追蹤→報告。最快看到成果。</p></a>
-      <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/01_detection.ipynb"><h3>M1 · YOLO 偵測</h3><p>六大場景實戰、模型大小比較。</p></a>
-      <a class="card link" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/02_applications.ipynb"><h3>M2 · 應用</h3><p>人數計算、OCR、車流監控。</p></a>
+    <p>操作步驟：開 Notebook → 執行階段選 GPU（沒 GPU 用 CPU 也行）→ Run all → 看各場景偵測結果。</p>
+    <div class="btns">
+      <a class="btn p" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/01_detection.ipynb">開啟偵測 Notebook（Colab）</a>
+      <a class="btn s" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/02_applications.ipynb">應用：計數 / OCR / 車流</a>
+      <a class="btn s" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/03_challenge.ipynb">挑戰題</a>
+      <a class="btn s" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/tier1_teaching_youtube_yolo.ipynb">進階：YouTube 串接</a>
     </div>
-    <p class="mut small">點上方連結只需 <b>Google 帳號</b>（不需 GitHub 帳號）→ 開啟後按 <b>Run all</b> 即可執行；要保留改動就「檔案 → 在雲端硬碟中儲存副本」。實際結果畫面見 <a href="04-demos.html">第 4 章 場景示範</a>。</p>
+    <p class="mut small">點上方按鈕只需 <b>Google 帳號</b>（不需 GitHub 帳號）→ 開啟後按 <b>Run all</b> 即可執行；要保留改動就「檔案 → 在雲端硬碟中儲存副本」。實際結果畫面見 <a href="04-demos.html">第 4 章 場景示範</a>。<br><span class="mut">註：「進階：YouTube 串接」的 YouTube 直播在 Colab 上可能受 Google 對資料中心 IP 的限制；課程主場景已改用國道即時 ＋ 內建影片，最穩定。</span></p>
   </section>
 
   <!-- ===== 第二級 ===== -->
@@ -103,27 +104,26 @@ $ python edge_count.py \
   <section class="level">
     <span class="lvtag">第三級 · 工業訓練</span>
     <h2>訓練自己的模型：金屬零件（COCO 沒有的東西）</h2>
-    <p>當標的是 COCO 不認得的東西（產線金屬零件），就要自己訓練。案例用開源的
-    <b>SteelDS</b>（輸送帶金屬廢料資料集，YOLO 格式、含影片、CC BY 4.0）。流程：下載 → Colab T4 微調 → 在它的影片上推論看結果。</p>
+    <p>當標的是 COCO 不認得的東西（產線金屬零件），就要自己訓練。案例用<b>課程內建的 Bolts 資料集</b>（螺栓 / 螺帽 / 螺絲 / 墊圈，YOLO 格式、CC BY 4.0、<b>免任何 API key</b>）。流程：一鍵下載內建資料 → Colab T4 微調 → 在測試影像上推論看結果。</p>
     <div class="mock colab">
       <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
         04_train_metal.ipynb<span class="pill">▶ Run all (T4)</span></div>
-      <pre><span class="c"># 1. 下載 SteelDS 子集（金屬零件，YOLO 格式）</span>
-!wget -q zenodo.org/records/20271102/files/a4.zip && unzip -q a4.zip
+      <pre><span class="c"># 1. 下載課程內建 Bolts 資料集（YOLO 格式，免 key）</span>
+!wget -q <span class="o">".../datasets/bolts.zip"</span> && unzip -q bolts.zip -d bolts
 <span class="c"># 2. Colab T4 微調</span>
-YOLO(<span class="o">"yolo11n.pt"</span>).train(data=<span class="o">"a4/data.yaml"</span>, epochs=50, imgsz=640)
-<span class="c"># 3. 在 SteelDS 影片上推論看結果</span>
-YOLO(<span class="o">"runs/detect/train/weights/best.pt"</span>).track(<span class="o">"steelds_clip.mp4"</span>, save=True)</pre>
+YOLO(<span class="o">"yolo11n.pt"</span>).train(data=<span class="o">"bolts/data.yaml"</span>, epochs=30, imgsz=640)
+<span class="c"># 3. 在測試影像上推論看結果</span>
+YOLO(<span class="o">"runs/detect/metal/weights/best.pt"</span>).predict(<span class="o">"bolts/test/images"</span>, save=True)</pre>
     </div>
     <ol class="steps">
-      <li><b>取資料</b>：SteelDS 子集 a4（4.9GB，輸送帶金屬，已標好 YOLO 框）；快速版可用 Roboflow「Bolts」(螺絲/螺帽)。</li>
+      <li><b>取資料</b>：課程內建 Bolts（645 張，已標好 YOLO 框，CC BY 4.0，<b>免 key、一鍵下載</b>）；進階可換 SteelDS a1/a2/a3（注意 a4/a5 無標註，會訓不出東西）。</li>
       <li><b>Colab T4 訓練</b>：從 yolo11n 微調，看 mAP 收斂。</li>
-      <li><b>驗證</b>：在沒看過的影片/影像上跑，確認泛化。</li>
+      <li><b>驗證</b>：在沒看過的測試影像上跑，確認泛化。</li>
       <li><b>部署</b>：匯出 NCNN → 回到第二級，放上 RPi 做產線即時計數。</li>
     </ol>
     <div class="btns">
       <a class="btn p" target="_blank" rel="noopener" href="https://colab.research.google.com/github/ai-cooperation/yolo-vision-course/blob/main/notebooks/workshop/04_train_metal.ipynb">開啟訓練 Notebook（Colab T4）</a>
-      <a class="btn s" target="_blank" rel="noopener" href="https://doi.org/10.5281/zenodo.20271102">SteelDS 資料集</a>
+      <a class="btn s" target="_blank" rel="noopener" href="https://doi.org/10.5281/zenodo.20271102">進階資料：SteelDS（Zenodo）</a>
     </div>
     <figure>
       <img src="media/metal_result.jpg" alt="自訓練金屬零件模型的偵測結果">
