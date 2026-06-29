@@ -10,7 +10,7 @@
 這是「在自己電腦上跑」的第二個案例（第一個是 edge_count.py 看交通串流）。
 
 安裝：
-    pip install mediapipe opencv-python
+    pip install mediapipe opencv-python pillow
 
 用法：
     python rps_play.py              # 用內建鏡頭
@@ -26,36 +26,85 @@ import random
 import urllib.request
 
 import cv2
+import numpy as np
 
 MOVES = ("rock", "paper", "scissors")
 ZH = {"rock": "石頭", "paper": "布", "scissors": "剪刀"}
+EN = {"rock": "Rock", "paper": "Paper", "scissors": "Scissors"}
 BEATS = {"rock": "scissors", "scissors": "paper", "paper": "rock"}  # key 贏 value
 
 FINGERS = [(8, 6), (12, 10), (16, 14), (20, 18)]  # (指尖, PIP) 食/中/無名/小指
-# 手部 21 點的骨架連線（畫圖用）
 CONNECTIONS = [
-    (0, 1), (1, 2), (2, 3), (3, 4),            # 拇指
-    (0, 5), (5, 6), (6, 7), (7, 8),            # 食指
-    (5, 9), (9, 10), (10, 11), (11, 12),       # 中指
-    (9, 13), (13, 14), (14, 15), (15, 16),     # 無名指
-    (13, 17), (17, 18), (18, 19), (19, 20), (0, 17),  # 小指 + 手掌
+    (0, 1), (1, 2), (2, 3), (3, 4),
+    (0, 5), (5, 6), (6, 7), (7, 8),
+    (5, 9), (9, 10), (10, 11), (11, 12),
+    (9, 13), (13, 14), (14, 15), (15, 16),
+    (13, 17), (17, 18), (18, 19), (19, 20), (0, 17),
 ]
 TASK_MODEL_URL = ("https://storage.googleapis.com/mediapipe-models/hand_landmarker/"
                   "hand_landmarker/float16/1/hand_landmarker.task")
 
+# 常見中文字型位置（Mac / Windows / Linux）。找得到就用 PIL 畫中文，否則退英文。
+_FONT_CANDIDATES = [
+    "/System/Library/Fonts/PingFang.ttc",
+    "/System/Library/Fonts/STHeiti Medium.ttc",
+    "/System/Library/Fonts/Hiragino Sans GB.ttc",
+    "C:/Windows/Fonts/msjh.ttc",
+    "C:/Windows/Fonts/msyh.ttc",
+    "C:/Windows/Fonts/simhei.ttf",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+]
+
+
+def _load_font(size=30):
+    try:
+        from PIL import ImageFont
+    except ImportError:
+        return None
+    for path in _FONT_CANDIDATES:
+        if os.path.exists(path):
+            try:
+                return ImageFont.truetype(path, size)
+            except Exception:
+                continue
+    return None
+
+
+_FONT = _load_font()
+_CJK = _FONT is not None
+
+
+def name(move):
+    """手勢顯示名：有中文字型用中文，否則英文。"""
+    if move is None:
+        return "（把手放進畫面）" if _CJK else "(show your hand)"
+    return ZH[move] if _CJK else EN[move]
+
+
+def put_lines(frame, lines):
+    """畫多行文字。lines = [(text, (x, y), (B, G, R)), ...]。
+    有中文字型 → 用 PIL 畫（支援中文）；否則退 cv2.putText（僅 ASCII）。"""
+    if _CJK:
+        from PIL import Image, ImageDraw
+        img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        draw = ImageDraw.Draw(img)
+        for text, (x, y), (b, g, r) in lines:
+            draw.text((x, y), text, font=_FONT, fill=(r, g, b))
+        frame[:] = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    else:
+        for text, (x, y), color in lines:
+            cv2.putText(frame, text, (x, y + 22), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
+
 
 def classify(landmarks):
-    """從 21 個 (x, y) 關鍵點判手勢。
-
-    判「手指伸直」：指尖離手腕 > PIP 關節離手腕 → 伸直。用距離比較，與手的朝向無關。
-    """
-    wrist = 0  # landmark index of the wrist
+    """從 21 個 (x, y) 關鍵點判手勢。指尖離手腕 > PIP 離手腕 ×1.15 → 該指伸直（與朝向無關）。"""
+    wrist = 0
 
     def dist(a, b):
         return math.hypot(landmarks[a][0] - landmarks[b][0],
                           landmarks[a][1] - landmarks[b][1])
 
-    # 乘 1.15 margin：握拳時指尖只稍微比 PIP 遠也算「彎」，石頭judge更準
     extended = [dist(tip, wrist) > dist(pip, wrist) * 1.15 for tip, pip in FINGERS]
     n = sum(extended)
     if n == 0:
@@ -69,12 +118,17 @@ def classify(landmarks):
 
 def judge(player, computer):
     if player == computer:
-        return "平手"
-    return "你贏！" if BEATS[player] == computer else "電腦贏"
+        return "draw"
+    return "win" if BEATS[player] == computer else "lose"
+
+
+def outcome_text(result):
+    if not _CJK:
+        return {"win": "YOU WIN", "lose": "CPU WINS", "draw": "DRAW"}[result]
+    return {"win": "你贏！", "lose": "電腦贏", "draw": "平手"}[result]
 
 
 def draw_hand(frame, landmarks):
-    """手動把 21 點 + 骨架畫到畫面上（Tasks API 沒有現成繪圖工具時用）。"""
     h, w = frame.shape[:2]
     pts = [(int(x * w), int(y * h)) for x, y in landmarks]
     for a, b in CONNECTIONS:
@@ -113,7 +167,6 @@ class HandTracker:
         self.mode = "tasks"
 
     def process(self, frame_bgr):
-        """回 21 個 (x, y) 關鍵點（normalized）或 None，並在畫面上畫手。"""
         rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
         if self.mode == "solutions":
             res = self.hands.process(rgb)
@@ -137,47 +190,52 @@ def main():
     args = ap.parse_args()
 
     tracker = HandTracker()
+    if not _CJK:
+        print("找不到中文字型，畫面文字改用英文顯示（功能不受影響）")
     cap = cv2.VideoCapture(args.camera)
     if not cap.isOpened():
         print("打不開鏡頭，請確認權限或換 --camera 編號")
         return
 
     score = {"you": 0, "cpu": 0}
-    banner = "對鏡頭比出手勢，按空白鍵出拳（q 結束）"
+    banner = "比出手勢，按空白鍵出拳（q 結束）" if _CJK else "Show gesture, SPACE = play, q = quit"
     flash = 0
 
     while True:
         ok, frame = cap.read()
         if not ok:
             break
-        frame = cv2.flip(frame, 1)  # 鏡像，像照鏡子
+        frame = cv2.flip(frame, 1)
         lm = tracker.process(frame)
         move = classify(lm) if lm else None
 
-        cv2.putText(frame, f"偵測：{ZH.get(move, '（把手放進畫面）')}", (12, 36),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 255), 2)
-        cv2.putText(frame, f"YOU {score['you']} : {score['cpu']} CPU", (12, 72),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+        lines = [
+            (f"{'偵測' if _CJK else 'Detected'}：{name(move)}" if _CJK
+             else f"Detected: {name(move)}", (12, 14), (0, 255, 255)),
+            (f"YOU {score['you']} : {score['cpu']} CPU", (12, 52), (0, 0, 255)),
+        ]
         if flash > 0:
-            cv2.putText(frame, banner, (12, frame.shape[0] - 20),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+            lines.append((banner, (12, frame.shape[0] - 40), (255, 255, 255)))
             flash -= 1
+        put_lines(frame, lines)
 
-        cv2.imshow("MediaPipe 猜拳 - 空白鍵出拳, q 結束", frame)
+        cv2.imshow("RPS (SPACE=play, q=quit)", frame)
         key = cv2.waitKey(1) & 0xFF
         if key in (ord("q"), 27):
             break
         if key == ord(" "):
             if move is None:
-                banner = "沒看清楚手勢，再試一次"
+                banner = "沒看清楚手勢，再試一次" if _CJK else "No gesture, try again"
             else:
                 cpu = random.choice(MOVES)
-                outcome = judge(move, cpu)
-                if outcome == "你贏！":
+                result = judge(move, cpu)
+                if result == "win":
                     score["you"] += 1
-                elif outcome == "電腦贏":
+                elif result == "lose":
                     score["cpu"] += 1
-                banner = f"你出{ZH[move]} vs 電腦{ZH[cpu]} → {outcome}"
+                vs = (f"你出{ZH[move]} vs 電腦{ZH[cpu]} → {outcome_text(result)}" if _CJK
+                      else f"You {EN[move]} vs CPU {EN[cpu]} -> {outcome_text(result)}")
+                banner = vs
             flash = 45
 
     cap.release()
