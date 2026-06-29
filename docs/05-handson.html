@@ -73,7 +73,13 @@ results[0].plot()                             <span class="c"># → 標好框的
     </div>
 
     <h3>沒有 Raspberry Pi？用你自己的電腦就能跑（Win / Mac / Linux）</h3>
-    <p>筆電 / 桌機就是現成的邊緣裝置，而且比 Pi 快。裝好套件後，這裡有兩個現成案例，各對應一種來源：</p>
+    <p>筆電 / 桌機就是現成的邊緣裝置，而且比 Pi 快。先照這三步把環境準備好，再選下面任一案例跑：</p>
+    <ol class="steps">
+      <li><b>裝 Python</b>：到 <a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org</a> 下載 3.10 以上版本安裝（Windows 安裝時務必勾「Add Python to PATH」；Mac 多半已內建 <code>python3</code>）。</li>
+      <li><b>取得腳本</b>：點下方案例的「取得 *.py」按鈕 → 在 GitHub 頁面右上角按「Download raw file」（下載圖示）→ 存到桌面。</li>
+      <li><b>開終端機</b>：Mac 開「終端機」、Windows 開「PowerShell」，用 <code>cd</code> 切到腳本所在資料夾（例：<code>cd Desktop</code>），再執行下面案例的指令。</li>
+    </ol>
+    <p class="mut small">第一次執行會跳出<b>相機權限</b>請求 → 按允許（Mac：系統設定 → 隱私權與安全性 → 相機，把「終端機」打勾後重開終端機）。打不開鏡頭就加 <code>--camera 1</code> 換一支；若系統找不到 <code>python</code> / <code>pip</code> 指令，改用 <code>python3</code> 與 <code>python3 -m pip</code>。</p>
 
     <h3 class="num">案例 1 · 即時交通串流：邊緣數車流</h3>
     <p>用 YOLO 接國道即時影像或本機影片，即時偵測 + 過線計數。對著國道串流數車流，或用網路攝影機對著馬路。</p>
