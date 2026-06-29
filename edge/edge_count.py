@@ -78,6 +78,8 @@ def open_capture(source):
     if "youtube.com" in source or "youtu.be" in source:
         source = resolve_youtube(source)
     target = int(source) if source.isdigit() else source
+    if isinstance(target, int) and os.name == "nt":   # Windows 攝影機用 DirectShow 較穩
+        return cv2.VideoCapture(target, cv2.CAP_DSHOW), False
     return cv2.VideoCapture(target), False
 
 

@@ -241,6 +241,13 @@ def countdown_num(stable_n):
     return min(3, max(1, (HOLD - stable_n) // STEP + 1))
 
 
+def open_camera(index):
+    """開攝影機；Windows 用 DirectShow 後端，開鏡頭較快也較穩。"""
+    if os.name == "nt":
+        return cv2.VideoCapture(index, cv2.CAP_DSHOW)
+    return cv2.VideoCapture(index)
+
+
 def main():
     ap = argparse.ArgumentParser(description="MediaPipe 視訊猜拳")
     ap.add_argument("--camera", type=int, default=0, help="鏡頭編號（預設 0）")
@@ -249,7 +256,7 @@ def main():
     tracker = HandTracker()
     if not _CJK:
         print("找不到中文字型，畫面文字改用英文顯示（功能不受影響）")
-    cap = cv2.VideoCapture(args.camera)
+    cap = open_camera(args.camera)
     if not cap.isOpened():
         print("打不開鏡頭，請確認權限或換 --camera 編號")
         return
