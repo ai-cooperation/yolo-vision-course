@@ -79,7 +79,7 @@ results[0].plot()                             <span class="c"># → 標好框的
       <li><b>取得腳本</b>：點下方案例的「取得 *.py」按鈕 → 在 GitHub 頁面右上角按「Download raw file」（下載圖示）→ 存到桌面。</li>
       <li><b>開終端機</b>：Mac 開「終端機」、Windows 開「PowerShell」，用 <code>cd</code> 切到腳本所在資料夾（例：<code>cd Desktop</code>），再執行下面案例的指令。</li>
     </ol>
-    <p class="mut small">第一次執行會跳出<b>相機權限</b>請求 → 按允許（Mac：系統設定 → 隱私權與安全性 → 相機，把「終端機」打勾後重開終端機）。打不開鏡頭就加 <code>--camera 1</code> 換一支；若系統找不到 <code>python</code> / <code>pip</code> 指令，改用 <code>python3</code> 與 <code>python3 -m pip</code>。</p>
+    <p class="mut small">第一次執行會跳出<b>相機權限</b>請求 → 按允許（Mac：系統設定 → 隱私權與安全性 → 相機，把「終端機」打勾後重開終端機）。打不開鏡頭就加 <code>--camera 1</code> 換一支；若系統找不到 <code>python</code> / <code>pip</code> 指令，改用 <code>python3</code> 與 <code>python3 -m pip</code>。若 <code>pip install</code> 卡在「Building wheel for opencv-python」（從原始碼編譯、非常慢甚至失敗），代表你的 Python 沒有對應的預編譯版——用 Anaconda 的人改用 <code>conda install -c conda-forge opencv</code>（免編譯），或改用與你 Mac 晶片（Apple Silicon / Intel）相符的原生 Python。</p>
 
     <h3 class="num">案例 1 · 即時交通串流：邊緣數車流</h3>
     <p>用 YOLO 接國道即時影像或本機影片，即時偵測 + 過線計數。對著國道串流數車流，或用網路攝影機對著馬路。</p>
