@@ -73,14 +73,17 @@ results[0].plot()                             <span class="c"># → 標好框的
     </div>
 
     <h3>沒有 Raspberry Pi？用你自己的電腦就能跑（Win / Mac / Linux）</h3>
-    <p>筆電 / 桌機就是現成的邊緣裝置，而且比 Pi 快。下載 <code>edge_count.py</code>，裝兩個套件就能即時偵測 + 過線計數——對著國道串流數車流、或用網路攝影機對著馬路 / 桌面都行。</p>
+    <p>筆電 / 桌機就是現成的邊緣裝置，而且比 Pi 快。裝好套件後，這裡有兩個現成案例，各對應一種來源：</p>
+
+    <h3 class="num">案例 1 · 即時交通串流：邊緣數車流</h3>
+    <p>用 YOLO 接國道即時影像或本機影片，即時偵測 + 過線計數。對著國道串流數車流，或用網路攝影機對著馬路。</p>
     <div class="mock term">
       <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span> 你的電腦 ~/edge</div>
       <pre><span class="c"># 1. 裝套件（一次）</span>
 $ pip install ultralytics opencv-python lap
 <span class="c"># 2a. 用國道即時影像數車流（預設）</span>
 $ python edge_count.py
-<span class="c"># 2b. 用你的網路攝影機（對著馬路 / 桌面）</span>
+<span class="c"># 2b. 用你的網路攝影機（對著馬路）</span>
 $ python edge_count.py <span class="o">--source 0</span>
 <span class="c"># 2c. 用本機影片檔，並調整計數線位置</span>
 $ python edge_count.py <span class="o">--source clip.mp4 --line 0.6</span>
@@ -88,6 +91,20 @@ $ python edge_count.py <span class="o">--source clip.mp4 --line 0.6</span>
     </div>
     <div class="btns">
       <a class="btn p" target="_blank" rel="noopener" href="https://github.com/ai-cooperation/yolo-vision-course/blob/main/edge/edge_count.py">取得 edge_count.py</a>
+    </div>
+
+    <h3 class="num">案例 2 · 視訊鏡頭玩猜拳：辨識手勢</h3>
+    <p>鏡頭對著你的手，即時辨識石頭 / 布 / 剪刀，按空白鍵跟電腦對戰。<b>這裡刻意不用 YOLO</b>：手勢的差別在「手指彎不彎」，用 MediaPipe 的手部 21 關鍵點判斷比框更準、更穩，而且免訓練、免資料集——<b>依任務選對工具</b>，正是這門課的重點之一。只要 webcam。</p>
+    <div class="mock term">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span> 你的電腦 ~/edge</div>
+      <pre><span class="c"># 1. 裝套件（一次）</span>
+$ pip install mediapipe opencv-python
+<span class="c"># 2. 開鏡頭玩猜拳</span>
+$ python rps_play.py
+<span class="o"># 比手勢 → 空白鍵出拳 → 電腦隨機出 → 累積比分；q 結束</span></pre>
+    </div>
+    <div class="btns">
+      <a class="btn p" target="_blank" rel="noopener" href="https://github.com/ai-cooperation/yolo-vision-course/blob/main/edge/rps_play.py">取得 rps_play.py</a>
     </div>
 
     <div class="gate" id="gatebox">
