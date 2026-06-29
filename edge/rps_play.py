@@ -97,6 +97,28 @@ def put_lines(frame, lines):
             cv2.putText(frame, text, (x, y + 22), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
 
 
+_FONT_BIG = _load_font(110)
+
+
+def put_big_center(frame, text, color_bgr):
+    """畫面正中央的大字（倒數 3/2/1、出拳）。PIL 優先，否則 cv2。"""
+    h, w = frame.shape[:2]
+    b, g, r = color_bgr
+    if _CJK and _FONT_BIG is not None:
+        from PIL import Image, ImageDraw
+        img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        draw = ImageDraw.Draw(img)
+        x0, y0, x1, y1 = draw.textbbox((0, 0), text, font=_FONT_BIG)
+        draw.text(((w - (x1 - x0)) // 2 - x0, (h - (y1 - y0)) // 2 - y0 - 20),
+                  text, font=_FONT_BIG, fill=(r, g, b))
+        frame[:] = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    else:
+        scale, thick = 3.0, 6
+        (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, thick)
+        cv2.putText(frame, text, ((w - tw) // 2, (h + th) // 2),
+                    cv2.FONT_HERSHEY_SIMPLEX, scale, color_bgr, thick)
+
+
 def classify(landmarks):
     """從 21 個 (x, y) 關鍵點判手勢。指尖離手腕 > PIP 離手腕 ×1.15 → 該指伸直（與朝向無關）。"""
     wrist = 0
@@ -202,9 +224,10 @@ def main():
     last_move = None          # 最近一次看到的有效手勢
     stable_move, stable_n = None, 0   # 連續穩定同一手勢的幀數
     cooldown = 0              # 出拳後的冷卻（顯示結果、避免連發）
-    HOLD = 16                 # 手勢穩住這麼多幀就自動出拳（約 1 秒）
-    hint = "穩住手勢約 1 秒會自動出拳（或按空白鍵）；q 結束" if _CJK \
-        else "Hold a gesture ~1s to play (or press SPACE); q to quit"
+    HOLD = 18                 # 手勢穩住這麼多幀就自動出拳（約 1 秒）
+    STEP = 6                  # 倒數每格幀數（HOLD/3，用來顯示 3 → 2 → 1）
+    hint = "穩住手勢，倒數 3-2-1 自動出拳（或按空白鍵）；q 結束" if _CJK \
+        else "Hold a gesture, 3-2-1 auto-play (or press SPACE); q to quit"
 
     def play_round(move):
         cpu = random.choice(MOVES)
@@ -240,13 +263,16 @@ def main():
             (f"偵測：{name(move)}" if _CJK else f"Detected: {name(move)}", (12, 12), (0, 255, 255)),
             (f"YOU {score['you']} : {score['cpu']} CPU", (12, 50), (0, 0, 255)),
         ]
-        if cooldown == 0 and move and 0 < stable_n < HOLD:
-            dots = "." * (1 + stable_n * 3 // HOLD)
-            lines.append((("穩住" if _CJK else "Hold") + dots, (12, 88), (255, 200, 0)))
-        elif result_banner:
+        if result_banner:
             lines.append((result_banner, (12, 88), (0, 255, 0)))
         lines.append((hint, (12, frame.shape[0] - 34), (200, 200, 200)))
         put_lines(frame, lines)
+        # 中央大字：穩住手勢時倒數 3 → 2 → 1，出拳瞬間顯示「出拳！」
+        if cooldown == 0 and move and 0 < stable_n < HOLD:
+            count = min(3, max(1, (HOLD - stable_n) // STEP + 1))
+            put_big_center(frame, str(count), (0, 200, 255))
+        elif cooldown >= 30:
+            put_big_center(frame, "出拳！" if _CJK else "GO!", (0, 255, 0))
         cv2.imshow("RPS (hold gesture or SPACE, q=quit)", frame)
 
         key = cv2.waitKey(1) & 0xFF
