@@ -100,14 +100,14 @@ $ python edge_count.py <span class="o">--source clip.mp4 --line 0.6</span>
     </div>
 
     <h3 class="num">案例 2 · 視訊鏡頭玩猜拳：辨識手勢</h3>
-    <p>鏡頭對著你的手，即時辨識石頭 / 布 / 剪刀，按空白鍵跟電腦對戰。<b>這裡刻意不用 YOLO</b>：手勢的差別在「手指彎不彎」，用 MediaPipe 的手部 21 關鍵點判斷比框更準、更穩，而且免訓練、免資料集——<b>依任務選對工具</b>，正是這門課的重點之一。只要 webcam。</p>
+    <p>鏡頭對著你的手，即時辨識石頭 / 布 / 剪刀，穩住手勢約 1 秒就自動跟電腦對戰（也可按空白鍵）。<b>這裡刻意不用 YOLO</b>：手勢的差別在「手指彎不彎」，用 MediaPipe 的手部 21 關鍵點判斷比框更準、更穩，而且免訓練、免資料集——<b>依任務選對工具</b>，正是這門課的重點之一。只要 webcam。</p>
     <div class="mock term">
       <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span> 你的電腦 ~/edge</div>
       <pre><span class="c"># 1. 裝套件（一次；pillow 讓畫面能顯示中文）</span>
 $ pip install mediapipe opencv-python pillow
 <span class="c"># 2. 開鏡頭玩猜拳</span>
 $ python rps_play.py
-<span class="o"># 比手勢 → 空白鍵出拳 → 電腦隨機出 → 累積比分；q 結束</span></pre>
+<span class="o"># 穩住手勢約1秒自動出拳(或按空白鍵) → 電腦隨機出 → 累積比分；q 結束</span></pre>
     </div>
     <div class="btns">
       <a class="btn p" target="_blank" rel="noopener" href="https://github.com/ai-cooperation/yolo-vision-course/blob/main/edge/rps_play.py">取得 rps_play.py</a>

@@ -198,8 +198,25 @@ def main():
         return
 
     score = {"you": 0, "cpu": 0}
-    banner = "比出手勢，按空白鍵出拳（q 結束）" if _CJK else "Show gesture, SPACE = play, q = quit"
-    flash = 0
+    result_banner = ""        # 上一回合結果（持久顯示）
+    last_move = None          # 最近一次看到的有效手勢
+    stable_move, stable_n = None, 0   # 連續穩定同一手勢的幀數
+    cooldown = 0              # 出拳後的冷卻（顯示結果、避免連發）
+    HOLD = 16                 # 手勢穩住這麼多幀就自動出拳（約 1 秒）
+    hint = "穩住手勢約 1 秒會自動出拳（或按空白鍵）；q 結束" if _CJK \
+        else "Hold a gesture ~1s to play (or press SPACE); q to quit"
+
+    def play_round(move):
+        cpu = random.choice(MOVES)
+        result = judge(move, cpu)
+        if result == "win":
+            score["you"] += 1
+        elif result == "lose":
+            score["cpu"] += 1
+        text = (f"你{ZH[move]} vs 電腦{ZH[cpu]} → {outcome_text(result)}" if _CJK
+                else f"You {EN[move]} vs CPU {EN[cpu]} -> {outcome_text(result)}")
+        print(f"[出拳] {text}   比分 YOU {score['you']} : {score['cpu']} CPU")
+        return text
 
     while True:
         ok, frame = cap.read()
@@ -209,34 +226,41 @@ def main():
         lm = tracker.process(frame)
         move = classify(lm) if lm else None
 
-        lines = [
-            (f"{'偵測' if _CJK else 'Detected'}：{name(move)}" if _CJK
-             else f"Detected: {name(move)}", (12, 14), (0, 255, 255)),
-            (f"YOU {score['you']} : {score['cpu']} CPU", (12, 52), (0, 0, 255)),
-        ]
-        if flash > 0:
-            lines.append((banner, (12, frame.shape[0] - 40), (255, 255, 255)))
-            flash -= 1
-        put_lines(frame, lines)
+        # 追蹤「同一手勢穩定多久」
+        if move and move == stable_move:
+            stable_n += 1
+        else:
+            stable_move, stable_n = move, (1 if move else 0)
+        if move:
+            last_move = move
+        if cooldown > 0:
+            cooldown -= 1
 
-        cv2.imshow("RPS (SPACE=play, q=quit)", frame)
+        lines = [
+            (f"偵測：{name(move)}" if _CJK else f"Detected: {name(move)}", (12, 12), (0, 255, 255)),
+            (f"YOU {score['you']} : {score['cpu']} CPU", (12, 50), (0, 0, 255)),
+        ]
+        if cooldown == 0 and move and 0 < stable_n < HOLD:
+            dots = "." * (1 + stable_n * 3 // HOLD)
+            lines.append((("穩住" if _CJK else "Hold") + dots, (12, 88), (255, 200, 0)))
+        elif result_banner:
+            lines.append((result_banner, (12, 88), (0, 255, 0)))
+        lines.append((hint, (12, frame.shape[0] - 34), (200, 200, 200)))
+        put_lines(frame, lines)
+        cv2.imshow("RPS (hold gesture or SPACE, q=quit)", frame)
+
         key = cv2.waitKey(1) & 0xFF
         if key in (ord("q"), 27):
             break
-        if key == ord(" "):
-            if move is None:
-                banner = "沒看清楚手勢，再試一次" if _CJK else "No gesture, try again"
-            else:
-                cpu = random.choice(MOVES)
-                result = judge(move, cpu)
-                if result == "win":
-                    score["you"] += 1
-                elif result == "lose":
-                    score["cpu"] += 1
-                vs = (f"你出{ZH[move]} vs 電腦{ZH[cpu]} → {outcome_text(result)}" if _CJK
-                      else f"You {EN[move]} vs CPU {EN[cpu]} -> {outcome_text(result)}")
-                banner = vs
-            flash = 45
+
+        played = None
+        if key == ord(" ") and (move or last_move):        # 空白鍵手動出拳
+            played = move or last_move
+        elif cooldown == 0 and move and stable_n >= HOLD:   # 穩住自動出拳
+            played = move
+        if played:
+            result_banner = play_round(played)
+            cooldown, stable_n = 40, 0
 
     cap.release()
     cv2.destroyAllWindows()
