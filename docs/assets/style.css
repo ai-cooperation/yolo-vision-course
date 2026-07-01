@@ -89,6 +89,8 @@ ul.credits li{padding:8px 0;border-bottom:1px solid var(--line)}
 .mock .bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#161b22;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut)}
 .mock .bar .dot{width:11px;height:11px;border-radius:50%} .dot.r{background:#ff5f56}.dot.y{background:#ffbd2e}.dot.g{background:#27c93f}
 .mock .bar .pill{margin-left:auto;background:var(--accent);color:#04130a;border-radius:999px;padding:2px 10px;font-weight:700;font-size:12px}
+.mock .bar .copybtn{margin-left:auto;background:var(--accent);color:#04130a;border:0;border-radius:999px;padding:3px 14px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
+.mock .bar .copybtn:hover{filter:brightness(1.1)}
 .mock pre{margin:0;padding:14px 16px;font-family:"SF Mono",Consolas,monospace;font-size:13.5px;color:#d7e0ea;white-space:pre-wrap;line-height:1.6}
 .mock pre .c{color:#7d8aa0} .mock pre .k{color:#79c0ff} .mock pre .o{color:#56d364}
 

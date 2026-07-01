@@ -84,7 +84,7 @@ results[0].plot()                             <span class="c"># → 標好框的
     <h3 class="num">案例 1 · 即時交通串流：邊緣數車流</h3>
     <p>用 YOLO 接國道即時影像或本機影片，即時偵測 + 過線計數。對著國道串流數車流，或用網路攝影機對著馬路。</p>
     <div class="mock term">
-      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span> 你的電腦 ~/edge</div>
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span> 你的電腦 ~/edge<button class="copybtn" data-clip="pip install ultralytics opencv-python lap&#10;python edge_count.py">複製指令</button></div>
       <pre><span class="c"># 1. 裝套件（一次）</span>
 $ pip install ultralytics opencv-python lap
 <span class="c"># 2a. 用國道即時影像數車流（預設）</span>
@@ -102,7 +102,7 @@ $ python edge_count.py <span class="o">--source clip.mp4 --line 0.6</span>
     <h3 class="num">案例 2 · 視訊鏡頭玩猜拳：辨識手勢</h3>
     <p>鏡頭對著你的手：先依序比出剪刀 / 石頭 / 布讓系統記住你的手勢，接著進入對戰——穩住手勢、畫面倒數 3-2-1，CPU 的拳會以圖片顯示在右上跟你的手對比，判定輸贏（也可按空白鍵）。<b>這裡刻意不用 YOLO</b>：手勢的差別在「手指彎不彎」，用 MediaPipe 的手部 21 關鍵點判斷比框更準、更穩，而且免訓練、免資料集——<b>依任務選對工具</b>，正是這門課的重點之一。只要 webcam。</p>
     <div class="mock term">
-      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span> 你的電腦 ~/edge</div>
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span> 你的電腦 ~/edge<button class="copybtn" data-clip="pip install mediapipe opencv-python pillow&#10;python rps_play.py">複製指令</button></div>
       <pre><span class="c"># 1. 裝套件（一次；pillow 讓畫面能顯示中文）</span>
 $ pip install mediapipe opencv-python pillow
 <span class="c"># 2. 開鏡頭玩猜拳</span>
@@ -195,6 +195,23 @@ YOLO(<span class="o">"runs/detect/metal/weights/best.pt"</span>).predict(<span c
       google.accounts.id.renderButton(document.getElementById('gbtn'), {theme:'outline', size:'large', text:'signin_with'});
     });
   }
+
+  // 指令複製：只複製乾淨可執行指令（去掉 $ 與註解），貼上終端機即可跑
+  function copyText(t){
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t);
+    var ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta); return Promise.resolve();
+  }
+  document.querySelectorAll('.copybtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      copyText(b.getAttribute('data-clip')).then(function(){
+        var old = b.textContent; b.textContent = '已複製 ✓';
+        setTimeout(function(){ b.textContent = old; }, 1500);
+      });
+    });
+  });
 </script>
 </body>
 </html>
